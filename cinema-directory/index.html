@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Reel Index — Watchlist &amp; Cinema Directory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #eef1ec;
+    --ink: #1c2024;
+    --crimson: #8c2f39;
+    --brass: #a9823c;
+    --slate: #5b6168;
+    --line: #d9d4c8;
+    --row-hover: rgba(140, 47, 57, 0.06);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #17191c;
+      --ink: #ede9e3;
+      --crimson: #e08088;
+      --brass: #d9b66b;
+      --slate: #9aa0a6;
+      --line: #2b2e33;
+      --row-hover: rgba(224, 128, 136, 0.08);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #17191c;
+    --ink: #ede9e3;
+    --crimson: #e08088;
+    --brass: #d9b66b;
+    --slate: #9aa0a6;
+    --line: #2b2e33;
+    --row-hover: rgba(224, 128, 136, 0.08);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(7.5rem + env(safe-area-inset-top, 0px));
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    background: var(--paper);
+    z-index: 10;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  header.masthead {
+    padding: 3.5rem 0 1.75rem;
+    border-bottom: 1px solid var(--line);
+    animation: rise 700ms ease-out both;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    header.masthead { animation: none; }
+  }
+
+  .kicker {
+    font-size: 0.8rem;
+    color: var(--crimson);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(2.25rem, 5vw, 3.1rem);
+    line-height: 1.05;
+    margin: 0.4rem 0 0.75rem;
+    letter-spacing: -0.01em;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--crimson);
+  }
+
+  .dek {
+    max-width: 58ch;
+    color: var(--slate);
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  .toolbar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    background: var(--paper);
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .search {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.55rem 1rem;
+    background: transparent;
+  }
+
+  .search svg { flex: none; opacity: 0.6; }
+
+  .search input {
+    all: unset;
+    flex: 1;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+  }
+
+  .search input::placeholder { color: var(--slate); }
+
+  .chips {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    margin-top: 0.85rem;
+    padding-bottom: 0.2rem;
+    scrollbar-width: thin;
+  }
+
+  .chips a {
+    flex: none;
+    text-decoration: none;
+    font-size: 0.82rem;
+    color: var(--slate);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.32rem 0.75rem;
+    white-space: nowrap;
+    transition: color 120ms ease, border-color 120ms ease;
+  }
+
+  .chips a:hover, .chips a:focus-visible {
+    color: var(--crimson);
+    border-color: var(--crimson);
+  }
+
+  main { margin-top: 1rem; }
+
+  section.category {
+    padding: 2.25rem 0;
+    border-bottom: 1px solid var(--line);
+    scroll-margin-top: 7rem;
+  }
+
+  section.category:last-child { border-bottom: none; }
+
+  .cat-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+  }
+
+  h2 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-style: italic;
+    font-size: 1.5rem;
+    margin: 0;
+  }
+
+  .count {
+    font-size: 0.78rem;
+    color: var(--slate);
+    font-variant-numeric: tabular-nums;
+  }
+
+  ul.sites {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  ul.sites li {
+    border-top: 1px solid var(--line);
+  }
+
+  ul.sites li:first-child { border-top: none; }
+
+  ul.sites a.row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    text-decoration: none;
+    padding: 0.85rem 0.25rem;
+    border-radius: 6px;
+    transition: background 120ms ease;
+  }
+
+  ul.sites a.row:hover,
+  ul.sites a.row:focus-visible {
+    background: var(--row-hover);
+    outline: none;
+  }
+
+  .site-name {
+    font-weight: 500;
+    font-size: 1rem;
+  }
+
+  .site-domain {
+    font-size: 0.85rem;
+    color: var(--brass);
+    white-space: nowrap;
+  }
+
+  footer {
+    padding-top: 2.5rem;
+    color: var(--slate);
+    font-size: 0.82rem;
+  }
+
+  .no-results {
+    display: none;
+    color: var(--slate);
+    font-size: 0.9rem;
+    padding: 2rem 0;
+  }
+
+  .no-results.show { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="kicker">A field guide to watchlists</div>
+    <h1>Where everyone<br>keeps <em>their</em> list</h1>
+    <p class="dek">Forty-plus trackers, databases and discovery sites for movies, anime, Asian drama, documentaries and world cinema — grouped by what they're actually for.</p>
+  </header>
+
+  <div class="toolbar">
+    <label class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="filter" type="text" placeholder="Filter by site or category…" autocomplete="off">
+    </label>
+    <nav class="chips" id="chips"></nav>
+  </div>
+
+  <main id="main"></main>
+  <p class="no-results" id="noResults">Nothing matches that search.</p>
+
+  <footer>Compiled for personal reference — streaming availability and site status change over time.</footer>
+</div>
+
+<script>
+const DATA = [
+  { cat: "All-Media Trackers", sites: [
+    ["Letterboxd", "letterboxd.com", "https://letterboxd.com"],
+    ["Trakt.tv", "trakt.tv", "https://trakt.tv"],
+    ["SIMKL", "simkl.com", "https://simkl.com"],
+    ["TMDB", "themoviedb.org", "https://www.themoviedb.org"],
+    ["IMDb", "imdb.com", "https://www.imdb.com"],
+    ["Moviebase", "moviebase.app", "https://moviebase.app"],
+    ["Criticker", "criticker.com", "https://www.criticker.com"],
+    ["FilmAffinity", "filmaffinity.com", "https://www.filmaffinity.com"],
+  ]},
+  { cat: "Anime & Manga", sites: [
+    ["MyAnimeList", "myanimelist.net", "https://myanimelist.net"],
+    ["AniList", "anilist.co", "https://anilist.co"],
+    ["Anime-Planet", "anime-planet.com", "https://www.anime-planet.com"],
+    ["AniDB", "anidb.net", "https://anidb.net"],
+    ["aniSearch", "anisearch.com", "https://www.anisearch.com"],
+    ["Kitsu", "kitsu.io", "https://kitsu.io"],
+    ["Shikimori", "shikimori.one", "https://shikimori.one"],
+    ["AniChart", "anichart.net", "https://anichart.net"],
+    ["LiveChart.me", "livechart.me", "https://www.livechart.me"],
+    ["Anime News Network", "animenewsnetwork.com", "https://www.animenewsnetwork.com"],
+  ]},
+  { cat: "K-Drama / J-Drama / C-Drama / Asian Cinema", sites: [
+    ["MyDramaList", "mydramalist.com", "https://mydramalist.com"],
+    ["AsianWiki", "asianwiki.com", "https://asianwiki.com"],
+    ["Dramabeans", "dramabeans.com", "https://www.dramabeans.com"],
+    ["Soompi", "soompi.com", "https://www.soompi.com"],
+    ["HanCinema", "hancinema.net", "https://www.hancinema.net"],
+    ["Viki", "viki.com", "https://www.viki.com"],
+    ["Kocowa", "kocowa.com", "https://www.kocowa.com"],
+    ["Viu", "viu.com", "https://www.viu.com"],
+    ["iQIYI", "iq.com", "https://www.iq.com"],
+  ]},
+  { cat: "Japanese Cinema", sites: [
+    ["JFDB — Japanese Film Database", "jfdb.jp", "https://jfdb.jp/en"],
+  ]},
+  { cat: "Middle Eastern Cinema", sites: [
+    ["ElCinema", "elcinema.com", "https://elcinema.com"],
+  ]},
+  { cat: "Hollywood / Box Office", sites: [
+    ["Box Office Mojo", "boxofficemojo.com", "https://www.boxofficemojo.com"],
+    ["The Numbers", "the-numbers.com", "https://www.the-numbers.com"],
+  ]},
+  { cat: "Animated Movies", sites: [
+    ["Cartoon Brew", "cartoonbrew.com", "https://www.cartoonbrew.com"],
+    ["Animation World Network", "awn.com", "https://www.awn.com"],
+  ]},
+  { cat: "Documentaries", sites: [
+    ["Kanopy", "kanopy.com", "https://www.kanopy.com"],
+    ["CuriosityStream", "curiositystream.com", "https://curiositystream.com"],
+    ["POV (PBS)", "pbs.org/pov", "https://www.pbs.org/pov"],
+    ["Docuseek", "docuseek2.com", "https://docuseek2.com"],
+  ]},
+  { cat: "Western / World / Arthouse Cinema", sites: [
+    ["MUBI", "mubi.com", "https://mubi.com"],
+    ["Criterion Channel", "criterionchannel.com", "https://www.criterionchannel.com"],
+    ["Rotten Tomatoes", "rottentomatoes.com", "https://www.rottentomatoes.com"],
+    ["Metacritic", "metacritic.com", "https://www.metacritic.com"],
+    ["RogerEbert.com", "rogerebert.com", "https://www.rogerebert.com"],
+    ["IndieWire", "indiewire.com", "https://www.indiewire.com"],
+  ]},
+  { cat: "European Cinema", sites: [
+    ["Cineuropa", "cineuropa.org", "https://cineuropa.org"],
+    ["Europa Cinemas", "europa-cinemas.org", "https://www.europa-cinemas.org"],
+  ]},
+  { cat: "Where-to-Watch Aggregators", sites: [
+    ["JustWatch", "justwatch.com", "https://www.justwatch.com"],
+    ["Reelgood", "reelgood.com", "https://reelgood.com"],
+  ]},
+];
+
+function slugify(s) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+const main = document.getElementById("main");
+const chips = document.getElementById("chips");
+
+DATA.forEach(group => {
+  const id = slugify(group.cat);
+
+  const chip = document.createElement("a");
+  chip.href = "#" + id;
+  chip.textContent = group.cat;
+  chips.appendChild(chip);
+
+  const section = document.createElement("section");
+  section.className = "category";
+  section.id = id;
+  section.dataset.search = group.cat.toLowerCase();
+
+  const head = document.createElement("div");
+  head.className = "cat-head";
+  head.innerHTML = `<h2>${group.cat}</h2><span class="count">${group.sites.length}</span>`;
+  section.appendChild(head);
+
+  const ul = document.createElement("ul");
+  ul.className = "sites";
+  group.sites.forEach(([name, domain, url]) => {
+    const li = document.createElement("li");
+    li.dataset.search = (name + " " + domain + " " + group.cat).toLowerCase();
+    const a = document.createElement("a");
+    a.className = "row";
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.innerHTML = `<span class="site-name">${name}</span><span class="site-domain">${domain}</span>`;
+    li.appendChild(a);
+    ul.appendChild(li);
+  });
+  section.appendChild(ul);
+  main.appendChild(section);
+});
+
+const filterInput = document.getElementById("filter");
+const noResults = document.getElementById("noResults");
+
+filterInput.addEventListener("input", () => {
+  const q = filterInput.value.trim().toLowerCase();
+  let anyVisible = false;
+
+  document.querySelectorAll("section.category").forEach(section => {
+    let sectionHasMatch = false;
+    section.querySelectorAll("ul.sites li").forEach(li => {
+      const match = !q || li.dataset.search.includes(q);
+      li.style.display = match ? "" : "none";
+      if (match) sectionHasMatch = true;
+    });
+    section.style.display = sectionHasMatch ? "" : "none";
+    if (sectionHasMatch) anyVisible = true;
+  });
+
+  noResults.classList.toggle("show", !anyVisible);
+});
+</script>
+</body>
+</html>

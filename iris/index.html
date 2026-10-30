@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Iris — Vision Instrument</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: light dark;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+
+    --bg: #E8E3D8;
+    --panel: #F1ECE0;
+    --panel-2: #EAE4D6;
+    --ink: #1C1E1F;
+    --ink-dim: #6A6D66;
+    --brass: #9C6324;
+    --brass-bright: #B97A2E;
+    --cyan: #3E6B7D;
+    --border: rgba(28,30,31,0.14);
+    --border-strong: rgba(28,30,31,0.26);
+    --shadow: 0 1px 2px rgba(20,18,12,0.10), 0 8px 24px rgba(20,18,12,0.06);
+    --screen-bg: #090B0D;
+    --screen-glow: rgba(217,154,75,0.22);
+    --danger: #A8432F;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #12161B;
+      --panel: #171C22;
+      --panel-2: #1D232B;
+      --ink: #ECE6D9;
+      --ink-dim: #8B9199;
+      --brass: #D79A4B;
+      --brass-bright: #E7AF66;
+      --cyan: #7FA6BC;
+      --border: rgba(236,230,217,0.12);
+      --border-strong: rgba(236,230,217,0.22);
+      --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 10px 30px rgba(0,0,0,0.35);
+      --screen-bg: #05070A;
+      --screen-glow: rgba(217,154,75,0.28);
+      --danger: #E07858;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #12161B;
+    --panel: #171C22;
+    --panel-2: #1D232B;
+    --ink: #ECE6D9;
+    --ink-dim: #8B9199;
+    --brass: #D79A4B;
+    --brass-bright: #E7AF66;
+    --cyan: #7FA6BC;
+    --border: rgba(236,230,217,0.12);
+    --border-strong: rgba(236,230,217,0.22);
+    --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 10px 30px rgba(0,0,0,0.35);
+    --screen-bg: #05070A;
+    --screen-glow: rgba(217,154,75,0.28);
+    --danger: #E07858;
+  }
+
+  *{ box-sizing: border-box; }
+  html, body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100%;
+  }
+  html{ scroll-padding-top: env(safe-area-inset-top, 0px); }
+
+  button, input{ font-family: inherit; color: inherit; }
+  button{ cursor:pointer; }
+  :focus-visible{ outline: 2px solid var(--brass); outline-offset: 2px; }
+
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+
+  /* ---------- Header ---------- */
+  .header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 18px;
+  }
+  .brand h1{
+    font-family: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+    font-weight: 700;
+    font-size: clamp(34px, 6vw, 48px);
+    letter-spacing: 0.01em;
+    line-height: 0.9;
+    margin: 0;
+  }
+  .brand p{
+    margin: 6px 0 0;
+    color: var(--ink-dim);
+    font-size: 14.5px;
+    max-width: 46ch;
+  }
+  .source-controls{
+    display:flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn{
+    border: 1px solid var(--border-strong);
+    background: var(--panel);
+    color: var(--ink);
+    border-radius: 9px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    box-shadow: var(--shadow);
+    transition: border-color .15s ease;
+  }
+  .btn:hover{ border-color: var(--brass); }
+  .btn.primary{
+    background: var(--brass);
+    border-color: var(--brass);
+    color: #1B140B;
+    font-weight: 600;
+  }
+  .btn.primary:hover{ background: var(--brass-bright); border-color: var(--brass-bright); }
+  .btn.ghost{ background: transparent; box-shadow:none; }
+  .btn[disabled]{ opacity:.45; cursor:default; pointer-events:none; }
+  .btn svg{ width:15px; height:15px; flex:none; }
+  input[type="file"]{ display:none; }
+
+  /* ---------- Layout grid ---------- */
+  .app{
+    display:grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "screen"
+      "chain"
+      "sidebar"
+      "looks";
+    gap: 16px;
+  }
+  @media (min-width: 900px){
+    .app{
+      grid-template-columns: 1fr 300px;
+      grid-template-areas:
+        "screen sidebar"
+        "chain  sidebar"
+        "looks  looks";
+      align-items: start;
+    }
+  }
+
+  /* ---------- Screen ---------- */
+  .screen-panel{
+    grid-area: screen;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+  }
+  .bezel{
+    position: relative;
+    background: var(--screen-bg);
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03), inset 0 18px 40px rgba(0,0,0,0.55);
+  }
+  .bezel::before, .bezel::after{
+    content:"";
+    position:absolute;
+    width:6px; height:6px;
+    border-radius:50%;
+    background: var(--border-strong);
+    top:8px;
+  }
+  .bezel::before{ left:8px; }
+  .bezel::after{ right:8px; }
+  .screen-stage{
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--screen-bg);
+  }
+  canvas#screen{
+    display:block;
+    width:100%;
+    height:auto;
+    image-rendering: pixelated;
+    background: var(--screen-bg);
+  }
+  canvas#screen.live{
+    box-shadow: 0 0 0 1px var(--screen-glow), 0 0 32px var(--screen-glow);
+  }
+  @keyframes powerOn{
+    0%{ filter:brightness(0.2) saturate(0.4); }
+    30%{ filter:brightness(1.6) saturate(1.3); }
+    55%{ filter:brightness(0.5) saturate(0.6); }
+    100%{ filter:brightness(1) saturate(1); }
+  }
+  canvas#screen.powering-on{ animation: powerOn .5s ease-out 1; }
+
+  .screen-overlay{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding: 24px;
+    pointer-events:none;
+  }
+  .screen-overlay p{
+    margin:0;
+    color: rgba(236,230,217,0.6);
+    font-size: 14px;
+    max-width: 32ch;
+    line-height:1.5;
+  }
+  .screen-overlay.hidden{ display:none; }
+
+  .hint-chip{
+    position:absolute;
+    left:50%;
+    bottom:14px;
+    transform: translateX(-50%);
+    background: rgba(5,7,10,0.72);
+    border: 1px solid rgba(236,230,217,0.18);
+    color: rgba(236,230,217,0.85);
+    font-size: 12.5px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .hint-chip.hidden{ display:none; }
+
+  .telemetry{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top: 10px;
+    padding: 0 2px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .telemetry-readout{
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--ink-dim);
+    letter-spacing: 0.01em;
+  }
+  .telemetry-actions{ display:flex; gap:8px; }
+
+  /* ---------- Chain rack ---------- */
+  .chain-panel{
+    grid-area: chain;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .panel-title{
+    font-size: 12.5px;
+    color: var(--ink-dim);
+    margin: 0 0 10px;
+    font-weight: 500;
+  }
+  .chain-rack{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    padding-bottom: 4px;
+    min-height: 54px;
+  }
+  .chain-empty{
+    color: var(--ink-dim);
+    font-size: 13.5px;
+    padding: 12px 4px;
+  }
+  .chain-item{
+    flex: none;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 10px;
+    cursor: grab;
+    transition: border-color .15s ease, transform .1s ease;
+  }
+  .chain-item:active{ cursor: grabbing; }
+  .chain-item.selected{ border-color: var(--brass); box-shadow: 0 0 0 1px var(--brass) inset; }
+  .chain-item.disabled{ opacity:.45; }
+  .chain-item.added-flash{ animation: addFlash .6s ease-out 1; }
+  @keyframes addFlash{
+    0%{ box-shadow: 0 0 0 2px var(--brass); }
+    100%{ box-shadow: 0 0 0 0 transparent; }
+  }
+  .chain-item .mod-name{ font-size: 13px; font-weight: 500; white-space:nowrap; }
+  .chain-item .mod-toggle{
+    width:26px; height:15px;
+    border-radius:999px;
+    background: var(--border-strong);
+    position:relative;
+    flex:none;
+    border:none;
+    padding:0;
+  }
+  .chain-item .mod-toggle::after{
+    content:"";
+    position:absolute;
+    width:11px; height:11px;
+    border-radius:50%;
+    background: var(--panel);
+    top:2px; left:2px;
+    transition: left .15s ease;
+  }
+  .chain-item.on .mod-toggle{ background: var(--brass); }
+  .chain-item.on .mod-toggle::after{ left:13px; }
+  .chain-item .mod-remove{
+    background:none; border:none; color: var(--ink-dim);
+    font-size:15px; line-height:1; padding:0 2px;
+  }
+  .chain-item .mod-remove:hover{ color: var(--danger); }
+  .chain-arrow{ color: var(--ink-dim); flex:none; align-self:center; font-size:14px; }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    grid-area: sidebar;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .lib-grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:8px;
+  }
+  .lib-card{
+    background: var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 8px;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+    text-align:left;
+  }
+  .lib-card:hover{ border-color: var(--brass); }
+  .lib-card svg{ width:22px; height:22px; color: var(--brass); }
+  .lib-card span{ font-size:12.5px; font-weight:500; line-height:1.2; }
+
+  .param-panel{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .param-empty{ color: var(--ink-dim); font-size: 13px; }
+  .param-mod-name{
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 10px;
+  }
+
+  .knob-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    padding: 6px 0 16px;
+  }
+  .knob{
+    width:92px; height:92px;
+    position:relative;
+    touch-action:none;
+    user-select:none;
+  }
+  .knob svg{ width:100%; height:100%; display:block; }
+  .knob-track{ fill:none; stroke: var(--border-strong); stroke-width:8; }
+  .knob-fill{ fill:none; stroke: var(--brass); stroke-width:8; stroke-linecap:round; transition: stroke-dashoffset .05s linear; }
+  .knob-pointer{ stroke: var(--ink); stroke-width:4; stroke-linecap:round; }
+  .knob-cap{ fill: var(--panel-2); stroke: var(--border-strong); stroke-width:1; }
+  .knob-value{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 15px;
+    font-weight:500;
+  }
+  .knob-label{ font-size: 12px; color: var(--ink-dim); }
+
+  .extra-param{ margin-bottom: 12px; }
+  .extra-param label{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    color: var(--ink-dim);
+    margin-bottom:6px;
+  }
+  .extra-param input[type="range"]{
+    width:100%;
+    accent-color: var(--brass);
+  }
+  .extra-param input[type="color"]{
+    width:100%; height:30px;
+    border:1px solid var(--border-strong);
+    border-radius:6px;
+    background:none;
+    padding:2px;
+  }
+  .extra-toggle{
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:12.5px; color: var(--ink-dim);
+  }
+
+  /* ---------- Looks strip ---------- */
+  .looks-panel{
+    grid-area: looks;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .looks-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+  }
+  .look-chip{
+    position:relative;
+    background: var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:8px 14px;
+    font-size:13px;
+    font-weight:500;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .look-chip:hover{ border-color: var(--brass); }
+  .look-chip.active{ border-color: var(--brass); color: var(--brass); }
+  .look-chip .dot{ width:5px; height:5px; border-radius:50%; background: var(--cyan); flex:none; }
+  .look-chip .del{ background:none; border:none; color: var(--ink-dim); font-size:13px; padding:0; }
+  .look-chip .del:hover{ color: var(--danger); }
+  .save-look{
+    display:flex; align-items:center; gap:6px;
+  }
+  .save-look input{
+    background: var(--panel-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size:13px;
+    width: 150px;
+  }
+
+  @media (max-width: 899px){
+    .lib-grid{ grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    canvas#screen.powering-on{ animation:none; }
+    .chain-item.added-flash{ animation:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="header">
+    <div class="brand">
+      <h1>Iris</h1>
+      <p>Point it at something, build a signal chain out of the modules below, and keep the looks that feel like yours.</p>
+    </div>
+    <div class="source-controls">
+      <button class="btn primary" id="camBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        Start camera
+      </button>
+      <button class="btn" id="uploadBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        Add image
+      </button>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+  </header>
+
+  <div class="app">
+
+    <section class="screen-panel" style="grid-area:screen">
+      <div class="bezel">
+        <div class="screen-stage">
+          <canvas id="screen" width="360" height="270"></canvas>
+          <div class="screen-overlay" id="screenOverlay">
+            <p id="screenMessage">No signal yet. Start the camera or add an image to begin.</p>
+          </div>
+          <div class="hint-chip hidden" id="chainHint">Chain’s empty — add a module below</div>
+        </div>
+      </div>
+      <div class="telemetry">
+        <div class="telemetry-readout" id="telemetry">WORK 360×270 · 0 fps · 0 modules</div>
+        <div class="telemetry-actions">
+          <button class="btn ghost" id="exportBtn" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+            Capture frame
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="chain-panel" style="grid-area:chain">
+      <p class="panel-title">Signal chain — drag to reorder, tap to edit</p>
+      <div class="chain-rack" id="chainRack"></div>
+    </section>
+
+    <aside class="sidebar" style="grid-area:sidebar">
+      <div>
+        <p class="panel-title">Modules — tap to add to the chain</p>
+        <div class="lib-grid" id="libGrid"></div>
+      </div>
+      <div class="param-panel" id="paramPanel">
+        <p class="param-empty">Select a module in the chain to shape it.</p>
+      </div>
+    </aside>
+
+    <section class="looks-panel" style="grid-area:looks">
+      <p class="panel-title">Looks</p>
+      <div class="looks-row" id="looksRow"></div>
+    </section>
+
+  </div>
+</div>
+
+<video id="cam" autoplay playsinline muted style="display:none"></video>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Utility ---------------- */
+  function hexToRgb(hex){
+    const h = hex.replace('#','');
+    const v = h.length===3 ? h.split('').map(c=>c+c).join('') : h;
+    const num = parseInt(v,16);
+    return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 };
+  }
+  function uid(){ return Math.random().toString(36).slice(2,9); }
+  function clamp(v,min,max){ return Math.min(max,Math.max(min,v)); }
+
+  /* ---------------- Module glyphs ---------------- */
+  const GLYPH = {
+    grayscale: '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0 0 20z" fill="currentColor"/><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
+    edge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 16l4-9 4 7 3-11 3 9 4-6 2 8"/></svg>',
+    posterize: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="16" width="20" height="3"/><rect x="2" y="11" width="14" height="3"/><rect x="2" y="6" width="8" height="3"/></svg>',
+    pixelate: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/><rect x="13" y="3" width="8" height="8" opacity=".35"/><rect x="3" y="13" width="8" height="8" opacity=".35"/></svg>',
+    halftone: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="19" r="1.6"/><circle cx="11" cy="19" r="2.6"/><circle cx="18" cy="19" r="3.6"/><circle cx="5" cy="9" r="2.6"/><circle cx="13" cy="8" r="3.6"/></svg>',
+    duotone: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="currentColor"/><path d="M12 2.5a9.5 9.5 0 0 1 0 19z" fill="var(--panel-2)"/><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>',
+    ascii: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 3L7 21M17 3l-2 18M3 9h18M2 16h18"/></svg>',
+    kaleidoscope: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12L12 2A10 10 0 0 1 20.7 7z"/><path d="M12 12L20.7 7A10 10 0 0 1 17 20.6z" opacity=".55"/><path d="M12 12L17 20.6A10 10 0 0 1 3.3 17z" opacity=".3"/></svg>',
+    scanline: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h20M2 10h14M2 15h20M2 20h10"/></svg>'
+  };
+
+  /* ---------------- Modules ---------------- */
+  const MODULES = {
+    grayscale:{
+      label:'Grayscale',
+      primary:{key:'mix', label:'Amount', min:0, max:100, step:1, def:100, unit:'%'},
+      extra:[],
+      apply(ctx,w,h,p){
+        const id = ctx.getImageData(0,0,w,h), d=id.data, mix=(p.mix??100)/100;
+        for(let i=0;i<d.length;i+=4){
+          const lum = 0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+          d[i]+=(lum-d[i])*mix; d[i+1]+=(lum-d[i+1])*mix; d[i+2]+=(lum-d[i+2])*mix;
+        }
+        ctx.putImageData(id,0,0);
+      }
+    },
+    posterize:{
+      label:'Posterize',
+      primary:{key:'levels', label:'Levels', min:2, max:16, step:1, def:4, unit:''},
+      extra:[],
+      apply(ctx,w,h,p){
+        const levels=Math.max(2,Math.round(p.levels??4)), step=255/(levels-1);
+        const id=ctx.getImageData(0,0,w,h), d=id.data;
+        for(let i=0;i<d.length;i+=4){
+          d[i]=Math.round(Math.round(d[i]/step)*step);
+          d[i+1]=Math.round(Math.round(d[i+1]/step)*step);
+          d[i+2]=Math.round(Math.round(d[i+2]/step)*step);
+        }
+        ctx.putImageData(id,0,0);
+      }
+    },
+    edge:{
+      label:'Edge Trace',
+      primary:{key:'threshold', label:'Threshold', min:10, max:255, step:1, def:80, unit:''},
+      extra:[{key:'invert', label:'Invert', type:'toggle', def:false}],
+      apply(ctx,w,h,p){
+        const threshold=p.threshold??80, invert=!!p.invert;
+        const src=ctx.getImageData(0,0,w,h), d=src.data;
+        const gray=new Float32Array(w*h);
+        for(let i=0,j=0;i<d.length;i+=4,j++) gray[j]=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+        const out=ctx.createImageData(w,h), od=out.data;
+        const gx=[-1,0,1,-2,0,2,-1,0,1], gy=[-1,-2,-1,0,0,0,1,2,1];
+        for(let y=1;y<h-1;y++){
+          for(let x=1;x<w-1;x++){
+            let sx=0, sy=0, k=0;
+            for(let yy=-1;yy<=1;yy++) for(let xx=-1;xx<=1;xx++){ const v=gray[(y+yy)*w+(x+xx)]; sx+=v*gx[k]; sy+=v*gy[k]; k++; }
+            let v=Math.sqrt(sx*sx+sy*sy)>threshold?255:0;
+            if(invert) v=255-v;
+            const idx=(y*w+x)*4; od[idx]=od[idx+1]=od[idx+2]=v; od[idx+3]=255;
+          }
+        }
+        ctx.putImageData(out,0,0);
+      }
+    },
+    pixelate:{
+      label:'Pixelate',
+      primary:{key:'block', label:'Block size', min:2, max:40, step:1, def:10, unit:'px'},
+      extra:[],
+      apply(ctx,w,h,p){
+        const block=Math.max(2,p.block??10);
+        const sw=Math.max(1,Math.round(w/block)), sh=Math.max(1,Math.round(h/block));
+        const tmp=document.createElement('canvas'); tmp.width=sw; tmp.height=sh;
+        const tctx=tmp.getContext('2d');
+        tctx.drawImage(ctx.canvas,0,0,w,h,0,0,sw,sh);
+        ctx.imageSmoothingEnabled=false;
+        ctx.clearRect(0,0,w,h);
+        ctx.drawImage(tmp,0,0,sw,sh,0,0,w,h);
+        ctx.imageSmoothingEnabled=true;
+      }
+    },
+    halftone:{
+      label:'Halftone',
+      primary:{key:'cell', label:'Dot grid', min:4, max:24, step:1, def:10, unit:'px'},
+      extra:[{key:'invert', label:'Invert', type:'toggle', def:false}],
+      apply(ctx,w,h,p){
+        const cell=Math.max(4,p.cell??10), inv=!!p.invert;
+        const src=ctx.getImageData(0,0,w,h), d=src.data;
+        const paper=inv?'#05070a':'#f4efe6', ink=inv?'#f4efe6':'#05070a';
+        ctx.fillStyle=paper; ctx.fillRect(0,0,w,h);
+        ctx.fillStyle=ink;
+        for(let y=0;y<h;y+=cell){
+          for(let x=0;x<w;x+=cell){
+            const cx=Math.min(w-1,x+Math.floor(cell/2)), cy=Math.min(h-1,y+Math.floor(cell/2));
+            const idx=(cy*w+cx)*4;
+            const lum=0.299*d[idx]+0.587*d[idx+1]+0.114*d[idx+2];
+            const r=(1-lum/255)*(cell*0.52);
+            if(r>0.4){ ctx.beginPath(); ctx.arc(x+cell/2,y+cell/2,r,0,Math.PI*2); ctx.fill(); }
+          }
+        }
+      }
+    },
+    duotone:{
+      label:'Duotone',
+      primary:{key:'mix', label:'Blend', min:0, max:100, step:1, def:100, unit:'%'},
+      extra:[{key:'colorA', label:'Shadow', type:'color', def:'#14181d'},{key:'colorB', label:'Highlight', type:'color', def:'#d79a4b'}],
+      apply(ctx,w,h,p){
+        const a=hexToRgb(p.colorA||'#14181d'), b=hexToRgb(p.colorB||'#d79a4b'), mix=(p.mix??100)/100;
+        const id=ctx.getImageData(0,0,w,h), d=id.data;
+        for(let i=0;i<d.length;i+=4){
+          const lum=(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2])/255;
+          const r=a.r+(b.r-a.r)*lum, g=a.g+(b.g-a.g)*lum, bl=a.b+(b.b-a.b)*lum;
+          d[i]+=(r-d[i])*mix; d[i+1]+=(g-d[i+1])*mix; d[i+2]+=(bl-d[i+2])*mix;
+        }
+        ctx.putImageData(id,0,0);
+      }
+    },
+    ascii:{
+      label:'ASCII',
+      primary:{key:'cell', label:'Cell size', min:6, max:24, step:1, def:10, unit:'px'},
+      extra:[{key:'ink', label:'Ink', type:'color', def:'#d79a4b'},{key:'paper', label:'Paper', type:'color', def:'#05070a'}],
+      apply(ctx,w,h,p){
+        const cell=Math.max(6,p.cell??10);
+        const ramp=' .:-=+*#%@';
+        const src=ctx.getImageData(0,0,w,h), d=src.data;
+        ctx.fillStyle=p.paper||'#05070a'; ctx.fillRect(0,0,w,h);
+        ctx.fillStyle=p.ink||'#d79a4b';
+        ctx.font=Math.floor(cell*1.15)+"px 'IBM Plex Mono', monospace";
+        ctx.textBaseline='top';
+        for(let y=0;y<h;y+=cell){
+          for(let x=0;x<w;x+=cell){
+            const cx=Math.min(w-1,x+Math.floor(cell/2)), cy=Math.min(h-1,y+Math.floor(cell/2));
+            const idx=(cy*w+cx)*4;
+            const lum=0.299*d[idx]+0.587*d[idx+1]+0.114*d[idx+2];
+            const ci=Math.min(ramp.length-1, Math.floor((lum/255)*(ramp.length-1)));
+            const ch=ramp[ci];
+            if(ch!==' ') ctx.fillText(ch,x,y);
+          }
+        }
+      }
+    },
+    kaleidoscope:{
+      label:'Kaleidoscope',
+      primary:{key:'segments', label:'Segments', min:2, max:16, step:1, def:6, unit:''},
+      extra:[{key:'spin', label:'Spin', min:-180, max:180, step:1, def:0}],
+      apply(ctx,w,h,p){
+        const segments=Math.max(2,Math.round(p.segments??6));
+        const spin=(p.spin??0)*Math.PI/180;
+        const tmp=document.createElement('canvas'); tmp.width=w; tmp.height=h;
+        tmp.getContext('2d').drawImage(ctx.canvas,0,0);
+        const cx=w/2, cy=h/2, step=(Math.PI*2)/segments;
+        ctx.clearRect(0,0,w,h);
+        ctx.save(); ctx.translate(cx,cy);
+        for(let i=0;i<segments;i++){
+          ctx.save();
+          ctx.rotate(step*i+spin);
+          if(i%2===1) ctx.scale(1,-1);
+          ctx.beginPath(); ctx.moveTo(0,0);
+          ctx.arc(0,0,Math.max(w,h),-step/2,step/2);
+          ctx.closePath(); ctx.clip();
+          ctx.drawImage(tmp,-cx,-cy);
+          ctx.restore();
+        }
+        ctx.restore();
+      }
+    },
+    scanline:{
+      label:'Scan & Glitch',
+      primary:{key:'amount', label:'Glitch', min:0, max:100, step:1, def:30, unit:'%'},
+      extra:[{key:'spacing', label:'Line spacing', min:1, max:10, step:1, def:3}],
+      apply(ctx,w,h,p){
+        const amount=(p.amount??30)/100, spacing=Math.max(1,Math.round(p.spacing??3));
+        const id=ctx.getImageData(0,0,w,h), d=id.data;
+        const shift=Math.round(amount*6);
+        if(shift>0){
+          const copy=new Uint8ClampedArray(d);
+          for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+            const idx=(y*w+x)*4, sIdx=(y*w+Math.min(w-1,x+shift))*4;
+            d[idx]=copy[sIdx];
+          }
+        }
+        for(let y=0;y<h;y++){
+          if(y%spacing===0){
+            for(let x=0;x<w;x++){ const idx=(y*w+x)*4; d[idx]*=0.6; d[idx+1]*=0.6; d[idx+2]*=0.6; }
+          }
+        }
+        const noiseAmt=amount*40;
+        for(let i=0;i<d.length;i+=4){
+          if(Math.random()<amount*0.15){ const n=(Math.random()-0.5)*noiseAmt; d[i]+=n; d[i+1]+=n; d[i+2]+=n; }
+        }
+        ctx.putImageData(id,0,0);
+      }
+    }
+  };
+  const MODULE_ORDER = ['grayscale','edge','posterize','pixelate','halftone','duotone','ascii','kaleidoscope','scanline'];
+
+  const BUILTIN_LOOKS = [
+    {id:'builtin-brass', name:'Brass Duotone', builtin:true, chain:[{type:'duotone', params:{mix:100, colorA:'#14181d', colorB:'#d79a4b'}, enabled:true}]},
+    {id:'builtin-trace', name:'Trace', builtin:true, chain:[{type:'edge', params:{threshold:70, invert:false}, enabled:true}]},
+    {id:'builtin-press', name:'Halftone Press', builtin:true, chain:[{type:'halftone', params:{cell:9, invert:false}, enabled:true}]},
+    {id:'builtin-terminal', name:'Terminal', builtin:true, chain:[{type:'ascii', params:{cell:9, ink:'#7FA6BC', paper:'#05070a'}, enabled:true}]}
+  ];
+
+  /* ---------------- State ---------------- */
+  let chain = [];
+  let selectedId = null;
+  let sourceType = null;   // 'camera' | 'image'
+  let sourceReady = false;
+  let uploadedImage = null;
+  let streamTracks = null;
+  let workW = 360, workH = 270;
+  let looks = [];
+
+  const screen = document.getElementById('screen');
+  const ctx = screen.getContext('2d', {willReadFrequently:true});
+  const video = document.getElementById('cam');
+  const screenOverlay = document.getElementById('screenOverlay');
+  const screenMessage = document.getElementById('screenMessage');
+  const chainHint = document.getElementById('chainHint');
+  const chainRack = document.getElementById('chainRack');
+  const libGrid = document.getElementById('libGrid');
+  const paramPanel = document.getElementById('paramPanel');
+  const looksRow = document.getElementById('looksRow');
+  const telemetry = document.getElementById('telemetry');
+  const camBtn = document.getElementById('camBtn');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const fileInput = document.getElementById('fileInput');
+  const exportBtn = document.getElementById('exportBtn');
+
+  /* ---------------- Persistence ---------------- */
+  function loadLooks(){
+    try{
+      const raw = localStorage.getItem('iris:looks');
+      const saved = raw ? JSON.parse(raw) : [];
+      looks = BUILTIN_LOOKS.concat(Array.isArray(saved) ? saved : []);
+    }catch(e){ looks = BUILTIN_LOOKS.slice(); }
+  }
+  function persistLooks(){
+    try{
+      const custom = looks.filter(l=>!l.builtin);
+      localStorage.setItem('iris:looks', JSON.stringify(custom));
+    }catch(e){ /* storage unavailable — looks stay session-only */ }
+  }
+  function loadLastChain(){
+    try{
+      const raw = localStorage.getItem('iris:chain');
+      if(raw){ const parsed = JSON.parse(raw); if(Array.isArray(parsed) && parsed.length) return parsed; }
+    }catch(e){}
+    return [{type:'duotone', params:Object.assign({}, defaultParams('duotone')), enabled:true}];
+  }
+  function persistChain(){
+    try{ localStorage.setItem('iris:chain', JSON.stringify(chain.map(c=>({type:c.type, params:c.params, enabled:c.enabled})))); }catch(e){}
+  }
+
+  function defaultParams(type){
+    const mod = MODULES[type];
+    const p = {};
+    p[mod.primary.key] = mod.primary.def;
+    mod.extra.forEach(e=>{ p[e.key] = e.def; });
+    return p;
+  }
+
+  /* ---------------- Module library ---------------- */
+  function renderLibrary(){
+    libGrid.innerHTML = '';
+    MODULE_ORDER.forEach(type=>{
+      const mod = MODULES[type];
+      const card = document.createElement('button');
+      card.className = 'lib-card';
+      card.innerHTML = GLYPH[type] + '<span>' + mod.label + '</span>';
+      card.addEventListener('click', ()=>addModule(type));
+      libGrid.appendChild(card);
+    });
+  }
+
+  function addModule(type){
+    const item = { id: uid(), type, params: defaultParams(type), enabled: true };
+    chain.push(item);
+    renderChain();
+    selectItem(item.id);
+    persistChain();
+    const el = chainRack.querySelector('[data-id="'+item.id+'"]');
+    if(el){ el.classList.add('added-flash'); setTimeout(()=>el.classList.remove('added-flash'), 650); }
+  }
+
+  /* ---------------- Chain rack ---------------- */
+  let dragSrcId = null;
+
+  function renderChain(){
+    chainRack.innerHTML = '';
+    if(!chain.length){
+      const empty = document.createElement('p');
+      empty.className = 'chain-empty';
+      empty.textContent = 'No modules yet — pick one from the library to start processing.';
+      chainRack.appendChild(empty);
+      chainHint.classList.remove('hidden');
+    }else{
+      chainHint.classList.add('hidden');
+      chain.forEach((item,i)=>{
+        if(i>0){
+          const arrow = document.createElement('span');
+          arrow.className = 'chain-arrow';
+          arrow.textContent = '→';
+          chainRack.appendChild(arrow);
+        }
+        const el = document.createElement('div');
+        el.className = 'chain-item' + (item.enabled?' on':'') + (item.id===selectedId?' selected':'');
+        el.dataset.id = item.id;
+        el.draggable = true;
+        el.innerHTML =
+          '<button class="mod-toggle" title="Enable or disable"></button>' +
+          '<span class="mod-name">' + MODULES[item.type].label + '</span>' +
+          '<button class="mod-remove" title="Remove">×</button>';
+        el.querySelector('.mod-toggle').addEventListener('click', (e)=>{ e.stopPropagation(); item.enabled=!item.enabled; renderChain(); persistChain(); });
+        el.querySelector('.mod-remove').addEventListener('click', (e)=>{ e.stopPropagation(); removeModule(item.id); });
+        el.addEventListener('click', ()=>selectItem(item.id));
+        el.addEventListener('dragstart', ()=>{ dragSrcId = item.id; });
+        el.addEventListener('dragover', (e)=>e.preventDefault());
+        el.addEventListener('drop', (e)=>{
+          e.preventDefault();
+          if(!dragSrcId || dragSrcId===item.id) return;
+          const from = chain.findIndex(c=>c.id===dragSrcId);
+          const to = chain.findIndex(c=>c.id===item.id);
+          const [moved] = chain.splice(from,1);
+          chain.splice(to,0,moved);
+          renderChain(); persistChain();
+        });
+        chainRack.appendChild(el);
+      });
+    }
+    updateTelemetry();
+  }
+
+  function removeModule(id){
+    chain = chain.filter(c=>c.id!==id);
+    if(selectedId===id) selectedId=null;
+    renderChain();
+    renderParams();
+    persistChain();
+  }
+
+  function selectItem(id){
+    selectedId = id;
+    renderChain();
+    renderParams();
+  }
+
+  /* ---------------- Param panel ---------------- */
+  function renderParams(){
+    const item = chain.find(c=>c.id===selectedId);
+    paramPanel.innerHTML = '';
+    if(!item){
+      const p = document.createElement('p');
+      p.className = 'param-empty';
+      p.textContent = 'Select a module in the chain to shape it.';
+      paramPanel.appendChild(p);
+      return;
+    }
+    const mod = MODULES[item.type];
+    const title = document.createElement('p');
+    title.className = 'param-mod-name';
+    title.textContent = mod.label;
+    paramPanel.appendChild(title);
+
+    paramPanel.appendChild(buildKnob(mod.primary, item.params, (val)=>{
+      item.params[mod.primary.key] = val;
+      persistChain();
+    }));
+
+    mod.extra.forEach(spec=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'extra-param';
+      if(spec.type==='toggle'){
+        wrap.innerHTML = '<div class="extra-toggle"><span>'+spec.label+'</span><input type="checkbox" '+(item.params[spec.key]?'checked':'')+'></div>';
+        wrap.querySelector('input').addEventListener('change', (e)=>{ item.params[spec.key]=e.target.checked; persistChain(); });
+      }else if(spec.type==='color'){
+        wrap.innerHTML = '<label>'+spec.label+'</label><input type="color" value="'+(item.params[spec.key]||spec.def)+'">';
+        wrap.querySelector('input').addEventListener('input', (e)=>{ item.params[spec.key]=e.target.value; persistChain(); });
+      }else{
+        const val = item.params[spec.key] ?? spec.def;
+        wrap.innerHTML = '<label><span>'+spec.label+'</span><span>'+val+'</span></label><input type="range" min="'+spec.min+'" max="'+spec.max+'" step="'+spec.step+'" value="'+val+'">';
+        const rangeEl = wrap.querySelector('input');
+        const labelVal = wrap.querySelector('label span:last-child');
+        rangeEl.addEventListener('input', (e)=>{ const v=parseFloat(e.target.value); item.params[spec.key]=v; labelVal.textContent=v; persistChain(); });
+      }
+      paramPanel.appendChild(wrap);
+    });
+  }
+
+  function buildKnob(spec, params, onChange){
+    const wrap = document.createElement('div');
+    wrap.className = 'knob-wrap';
+    let value = params[spec.key] ?? spec.def;
+
+    const knob = document.createElement('div');
+    knob.className = 'knob';
+    knob.tabIndex = 0;
+    knob.setAttribute('role','slider');
+    knob.setAttribute('aria-valuemin', spec.min);
+    knob.setAttribute('aria-valuemax', spec.max);
+
+    const R = 42, C = 2*Math.PI*R;
+    knob.innerHTML =
+      '<svg viewBox="0 0 100 100">' +
+        '<circle class="knob-track" cx="50" cy="50" r="'+R+'"/>' +
+        '<circle class="knob-fill" cx="50" cy="50" r="'+R+'" transform="rotate(-90 50 50)"/>' +
+        '<circle class="knob-cap" cx="50" cy="50" r="30"/>' +
+        '<line class="knob-pointer" x1="50" y1="50" x2="50" y2="24"/>' +
+      '</svg>';
+    const fillEl = knob.querySelector('.knob-fill');
+    const pointerEl = knob.querySelector('.knob-pointer');
+    fillEl.style.strokeDasharray = C;
+
+    const valueEl = document.createElement('div');
+    valueEl.className = 'knob-value';
+    const labelEl = document.createElement('div');
+    labelEl.className = 'knob-label';
+    labelEl.textContent = spec.label;
+
+    function paint(){
+      const frac = clamp((value-spec.min)/(spec.max-spec.min), 0, 1);
+      fillEl.style.strokeDashoffset = C*(1-frac);
+      const angle = -135 + frac*270;
+      pointerEl.setAttribute('transform', 'rotate('+angle+' 50 50)');
+      valueEl.textContent = Math.round(value*10)/10 + (spec.unit||'');
+      knob.setAttribute('aria-valuenow', value);
+    }
+    paint();
+
+    let dragging = false, startY = 0, startVal = 0;
+    const range = spec.max-spec.min;
+    knob.addEventListener('pointerdown', (e)=>{
+      dragging = true; startY = e.clientY; startVal = value;
+      knob.setPointerCapture(e.pointerId);
+    });
+    knob.addEventListener('pointermove', (e)=>{
+      if(!dragging) return;
+      const dy = startY - e.clientY;
+      const delta = (dy/140) * range;
+      value = clamp(Math.round((startVal+delta)/spec.step)*spec.step, spec.min, spec.max);
+      paint(); onChange(value);
+    });
+    function endDrag(e){ dragging=false; }
+    knob.addEventListener('pointerup', endDrag);
+    knob.addEventListener('pointercancel', endDrag);
+    knob.addEventListener('keydown', (e)=>{
+      let delta = 0;
+      if(e.key==='ArrowUp'||e.key==='ArrowRight') delta = spec.step;
+      if(e.key==='ArrowDown'||e.key==='ArrowLeft') delta = -spec.step;
+      if(delta){
+        value = clamp(value+delta, spec.min, spec.max);
+        paint(); onChange(value); e.preventDefault();
+      }
+    });
+
+    wrap.appendChild(knob);
+    wrap.appendChild(valueEl);
+    wrap.appendChild(labelEl);
+    return wrap;
+  }
+
+  /* ---------------- Looks ---------------- */
+  function renderLooks(){
+    looksRow.innerHTML = '';
+    looks.forEach(look=>{
+      const chip = document.createElement('button');
+      chip.className = 'look-chip';
+      chip.innerHTML = (look.builtin ? '<span class="dot"></span>' : '') + '<span>'+look.name+'</span>' + (look.builtin ? '' : '<button class="del" title="Delete">×</button>');
+      chip.querySelector('span:last-child, span').addEventListener?.('click', ()=>{});
+      chip.addEventListener('click', (e)=>{
+        if(e.target.classList.contains('del')) return;
+        applyLook(look);
+      });
+      const del = chip.querySelector('.del');
+      if(del) del.addEventListener('click', (e)=>{ e.stopPropagation(); deleteLook(look.id); });
+      looksRow.appendChild(chip);
+    });
+
+    const saveWrap = document.createElement('div');
+    saveWrap.className = 'save-look';
+    saveWrap.innerHTML = '<input type="text" id="lookName" placeholder="Name this look" maxlength="24"><button class="btn ghost" id="saveLookBtn">Save look</button>';
+    looksRow.appendChild(saveWrap);
+    document.getElementById('saveLookBtn').addEventListener('click', saveCurrentLook);
+    document.getElementById('lookName').addEventListener('keydown', (e)=>{ if(e.key==='Enter') saveCurrentLook(); });
+  }
+
+  function applyLook(look){
+    chain = look.chain.map(c=>({ id:uid(), type:c.type, params:Object.assign({}, c.params), enabled: c.enabled!==false }));
+    selectedId = null;
+    renderChain(); renderParams(); persistChain();
+  }
+
+  function saveCurrentLook(){
+    const input = document.getElementById('lookName');
+    const name = (input.value||'').trim();
+    if(!name || !chain.length) return;
+    looks.push({ id:uid(), name, chain: chain.map(c=>({type:c.type, params:Object.assign({},c.params), enabled:c.enabled})) });
+    persistLooks();
+    renderLooks();
+  }
+
+  function deleteLook(id){
+    looks = looks.filter(l=>l.id!==id);
+    persistLooks();
+    renderLooks();
+  }
+
+  /* ---------------- Source: camera / image ---------------- */
+  function computeWorkSize(sw, sh){
+    workW = 360;
+    workH = Math.max(1, Math.round(workW * (sh/sw)));
+    screen.width = workW; screen.height = workH;
+  }
+
+  async function startCamera(){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:'environment'}, audio:false });
+      video.srcObject = stream;
+      await video.play();
+      streamTracks = stream.getTracks();
+      sourceType = 'camera'; sourceReady = true;
+      computeWorkSize(video.videoWidth||640, video.videoHeight||480);
+      setLive();
+      camBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Stop camera';
+    }catch(err){
+      showMessage('Camera access denied. Add an image instead.');
+    }
+  }
+  function stopCamera(){
+    if(streamTracks) streamTracks.forEach(t=>t.stop());
+    streamTracks = null;
+    if(sourceType==='camera'){ sourceType=null; sourceReady=false; showMessage('Camera stopped. Start it again or add an image.'); }
+    camBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Start camera';
+  }
+  camBtn.addEventListener('click', ()=>{ sourceType==='camera' ? stopCamera() : startCamera(); });
+
+  uploadBtn.addEventListener('click', ()=>fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    if(streamTracks) stopCamera();
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    img.onload = ()=>{
+      uploadedImage = img;
+      sourceType = 'image'; sourceReady = true;
+      computeWorkSize(img.naturalWidth, img.naturalHeight);
+      setLive();
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = ()=>{ showMessage('Couldn’t read that image. Try another file.'); };
+    img.src = url;
+  });
+
+  function setLive(){
+    screenOverlay.classList.add('hidden');
+    screen.classList.add('live','powering-on');
+    setTimeout(()=>screen.classList.remove('powering-on'), 550);
+    exportBtn.disabled = false;
+  }
+  function showMessage(msg){
+    screenMessage.textContent = msg;
+    screenOverlay.classList.remove('hidden');
+    screen.classList.remove('live');
+  }
+
+  /* ---------------- Render loop ---------------- */
+  let frameCount = 0, lastFpsTime = performance.now(), fps = 0;
+  function updateTelemetry(){
+    const activeCount = chain.filter(c=>c.enabled).length;
+    telemetry.textContent = 'WORK ' + workW + '×' + workH + ' · ' + fps + ' fps · ' + activeCount + ' module' + (activeCount===1?'':'s');
+  }
+
+  function tick(ts){
+    if(sourceReady){
+      const el = sourceType==='camera' ? video : uploadedImage;
+      if(el && (sourceType!=='camera' || video.readyState>=2)){
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(el, 0, 0, workW, workH);
+        chain.forEach(item=>{ if(item.enabled) MODULES[item.type].apply(ctx, workW, workH, item.params); });
+      }
+      frameCount++;
+      const now = performance.now();
+      if(now - lastFpsTime > 500){
+        fps = Math.round((frameCount*1000)/(now-lastFpsTime));
+        frameCount = 0; lastFpsTime = now;
+        updateTelemetry();
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------------- Export ---------------- */
+  exportBtn.addEventListener('click', async ()=>{
+    if(!sourceReady) return;
+    screen.toBlob(async (blob)=>{
+      if(!blob) return;
+      try{
+        const downloads = await (window.claude ? window.claude.use('downloads') : Promise.resolve(null));
+        if(downloads){
+          await downloads.save({ filename: 'iris-capture.png', data: blob });
+        }else{
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'iris-capture.png';
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }
+      }catch(e){ /* viewer declined or save unavailable — no further action */ }
+    }, 'image/png');
+  });
+
+  /* ---------------- Init ---------------- */
+  function init(){
+    loadLooks();
+    chain = loadLastChain();
+    renderLibrary();
+    renderChain();
+    renderParams();
+    renderLooks();
+    updateTelemetry();
+    requestAnimationFrame(tick);
+  }
+  init();
+})();
+</script>
+</body>
+</html>

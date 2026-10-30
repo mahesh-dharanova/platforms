@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A Watchlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F2ECDB;
+    --bg-raised: #EAE2CC;
+    --ink: #2A241C;
+    --ink-soft: #746A58;
+    --ink-faint: #9C937E;
+    --rule: #D6CBAE;
+    --accent: #3F5D52;
+    --accent-soft: #6E8C7F;
+    color-scheme: light;
+    --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1B1812;
+      --bg-raised: #241F17;
+      --ink: #EDE4D0;
+      --ink-soft: #AFA489;
+      --ink-faint: #817763;
+      --rule: #3A3426;
+      --accent: #8FB3A3;
+      --accent-soft: #6E8C7F;
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #1B1812;
+    --bg-raised: #241F17;
+    --ink: #EDE4D0;
+    --ink-soft: #AFA489;
+    --ink-faint: #817763;
+    --rule: #3A3426;
+    --accent: #8FB3A3;
+    --accent-soft: #6E8C7F;
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-padding-top: calc(72px + env(safe-area-inset-top, 0px));
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-serif);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100%;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    background: var(--bg);
+    z-index: 20;
+  }
+
+  header.masthead {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 64px 28px 36px;
+  }
+
+  header.masthead h1 {
+    font-size: clamp(2rem, 5vw, 2.6rem);
+    font-weight: 600;
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+
+  header.masthead p {
+    margin: 0;
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    max-width: 52ch;
+  }
+
+  nav.index {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: var(--bg);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  nav.index .rail {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 28px;
+    display: flex;
+    gap: 22px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  nav.index .rail::-webkit-scrollbar { display: none; }
+
+  nav.index a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    padding: 14px 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  nav.index a:hover,
+  nav.index a:focus-visible {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 8px 28px 100px;
+  }
+
+  section.category {
+    padding-top: 52px;
+    scroll-margin-top: calc(60px + env(safe-area-inset-top, 0px));
+  }
+
+  section.category + section.category {
+    border-top: 1px solid var(--rule);
+  }
+
+  .category-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .category-head h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .category-head .count {
+    color: var(--ink-faint);
+    font-size: 0.92rem;
+    font-style: italic;
+  }
+
+  .category-note {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    margin: 0 0 20px;
+    max-width: 56ch;
+    line-height: 1.55;
+  }
+
+  ol.entries {
+    list-style: none;
+    counter-reset: entry;
+    margin: 0;
+    padding: 0;
+  }
+
+  ol.entries li {
+    counter-increment: entry;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  ol.entries li:last-child { border-bottom: none; }
+
+  ol.entries li::before {
+    content: counter(entry);
+    flex: 0 0 auto;
+    width: 1.6em;
+    text-align: right;
+    color: var(--accent-soft);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .entry-title {
+    flex: 1 1 auto;
+    font-size: 1.04rem;
+    color: var(--ink);
+  }
+
+  .entry-origin {
+    flex: 0 0 auto;
+    color: var(--ink-faint);
+    font-size: 0.88rem;
+    font-style: italic;
+    white-space: nowrap;
+  }
+
+  footer {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 28px 60px;
+    color: var(--ink-faint);
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+
+  @media (max-width: 480px) {
+    header.masthead { padding: 48px 20px 28px; }
+    nav.index .rail { padding: 0 20px; }
+    main { padding: 8px 20px 80px; }
+    .entry-origin { white-space: normal; text-align: right; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <h1>A Watchlist</h1>
+  <p>Slice of life, comedy that doesn&rsquo;t take itself seriously, and the odd dark joke &mdash; none of it violent, none of it grim for grimness&rsquo; sake. Gathered across Japan, Korea, and further afield.</p>
+</header>
+
+<nav class="index">
+  <div class="rail">
+    <a href="#japan">Japan</a>
+    <a href="#korea">Korea</a>
+    <a href="#anime-movies">Anime &mdash; Films</a>
+    <a href="#anime-series">Anime &mdash; Series</a>
+    <a href="#asia">Asian Cinema</a>
+    <a href="#middle-east">Middle Eastern Cinema</a>
+    <a href="#europe">European Cinema</a>
+    <a href="#animated">Animated Cinema</a>
+  </div>
+</nav>
+
+<main>
+
+  <section class="category" id="japan">
+    <div class="category-head">
+      <h2>Japan</h2>
+      <span class="count">23 films</span>
+    </div>
+    <ol class="entries">
+      <li><span class="entry-title">Perfect Days</span></li>
+      <li><span class="entry-title">Tampopo</span></li>
+      <li><span class="entry-title">Kamome Diner</span></li>
+      <li><span class="entry-title">Kikujiro</span></li>
+      <li><span class="entry-title">Survival Family</span></li>
+      <li><span class="entry-title">Megane (Glasses)</span></li>
+      <li><span class="entry-title">After the Storm</span></li>
+      <li><span class="entry-title">Sweet Bean (An)</span></li>
+      <li><span class="entry-title">Udon</span></li>
+      <li><span class="entry-title">Still Walking</span></li>
+      <li><span class="entry-title">Josee, the Tiger and the Fish</span></li>
+      <li><span class="entry-title">My Neighbors the Yamadas</span></li>
+      <li><span class="entry-title">Ocean Waves</span></li>
+      <li><span class="entry-title">The Taste of Tea</span></li>
+      <li><span class="entry-title">Fine, Totally Fine</span></li>
+      <li><span class="entry-title">Adrift in Tokyo</span></li>
+      <li><span class="entry-title">Instant Swamp</span></li>
+      <li><span class="entry-title">Turtles Are Surprisingly Fast Swimmers</span></li>
+      <li><span class="entry-title">The Mohican Comes Home</span></li>
+      <li><span class="entry-title">Our Little Sister</span></li>
+      <li><span class="entry-title">Rent-a-Cat</span></li>
+      <li><span class="entry-title">Thermae Romae</span></li>
+      <li><span class="entry-title">Wood Job!</span></li>
+    </ol>
+  </section>
+
+  <section class="category" id="korea">
+    <div class="category-head">
+      <h2>Korea</h2>
+      <span class="count">17 films</span>
+    </div>
+    <ol class="entries">
+      <li><span class="entry-title">Little Forest</span></li>
+      <li><span class="entry-title">Right Now, Wrong Then</span></li>
+      <li><span class="entry-title">Microhabitat</span></li>
+      <li><span class="entry-title">Save the Green Planet!</span></li>
+      <li><span class="entry-title">Castaway on the Moon</span></li>
+      <li><span class="entry-title">Daytime Drinking</span></li>
+      <li><span class="entry-title">Worst Woman</span></li>
+      <li><span class="entry-title">Hill of Freedom</span></li>
+      <li><span class="entry-title">Miss Granny</span></li>
+      <li><span class="entry-title">Lucky Chan-sil</span></li>
+      <li><span class="entry-title">Moving On</span></li>
+      <li><span class="entry-title">In Front of Your Face</span></li>
+      <li><span class="entry-title">The Novelist&rsquo;s Film</span></li>
+      <li><span class="entry-title">Our Sunhi</span></li>
+      <li><span class="entry-title">My Sassy Girl</span></li>
+      <li><span class="entry-title">200 Pounds Beauty</span></li>
+      <li><span class="entry-title">Punch (Wandeuki)</span></li>
+    </ol>
+  </section>
+
+  <section class="category" id="anime-movies">
+    <div class="category-head">
+      <h2>Anime &mdash; Films</h2>
+      <span class="count">6 titles</span>
+    </div>
+    <ol class="entries">
+      <li><span class="entry-title">Mind Game</span></li>
+      <li><span class="entry-title">The Night Is Short, Walk On Girl</span></li>
+      <li><span class="entry-title">Wolf Children</span></li>
+      <li><span class="entry-title">Flavors of Youth</span></li>
+      <li><span class="entry-title">Mushi-Shi: The Next Chapter</span></li>
+      <li><span class="entry-title">Cat Soup</span><span class="entry-origin">short / OVA</span></li>
+    </ol>
+  </section>
+
+  <section class="category" id="anime-series">
+    <div class="category-head">
+      <h2>Anime &mdash; Series</h2>
+      <span class="count">14 titles</span>
+    </div>
+    <ol class="entries">
+      <li><span class="entry-title">Nichijou</span></li>
+      <li><span class="entry-title">The Tatami Galaxy</span></li>
+      <li><span class="entry-title">Welcome to the NHK</span></li>
+      <li><span class="entry-title">Uchouten Kazoku (The Eccentric Family)</span></li>
+      <li><span class="entry-title">Girls&rsquo; Last Tour</span></li>
+      <li><span class="entry-title">Mushishi</span></li>
+      <li><span class="entry-title">Barakamon</span></li>
+      <li><span class="entry-title">Sakamoto Desu Ga?</span></li>
+      <li><span class="entry-title">Non Non Biyori</span></li>
+      <li><span class="entry-title">Tanaka-kun is Always Listless</span></li>
+      <li><span class="entry-title">Aggretsuko</span></li>
+      <li><span class="entry-title">Space Dandy</span></li>
+      <li><span class="entry-title">Ping Pong the Animation</span></li>
+      <li><span class="entry-title">Kaiba</span></li>
+    </ol>
+  </section>
+
+  <section class="category" id="asia">
+    <div class="category-head">
+      <h2>Asian Cinema</h2>
+      <span class="count">20 films</span>
+    </div>
+    <p class="category-note">Beyond Japan and Korea.</p>
+    <ol class="entries">
+      <li><span class="entry-title">Yi Yi</span><span class="entry-origin">Taiwan</span></li>
+      <li><span class="entry-title">Eat Drink Man Woman</span><span class="entry-origin">Taiwan</span></li>
+      <li><span class="entry-title">What Time Is It There?</span><span class="entry-origin">Taiwan</span></li>
+      <li><span class="entry-title">Au Revoir Taipei</span><span class="entry-origin">Taiwan</span></li>
+      <li><span class="entry-title">Chungking Express</span><span class="entry-origin">Hong Kong</span></li>
+      <li><span class="entry-title">Fallen Angels</span><span class="entry-origin">Hong Kong</span></li>
+      <li><span class="entry-title">Shower</span><span class="entry-origin">China</span></li>
+      <li><span class="entry-title">The Farewell</span><span class="entry-origin">China / USA</span></li>
+      <li><span class="entry-title">Uncle Boonmee Who Can Recall His Past Lives</span><span class="entry-origin">Thailand</span></li>
+      <li><span class="entry-title">Cemetery of Splendour</span><span class="entry-origin">Thailand</span></li>
+      <li><span class="entry-title">Mary Is Happy, Mary Is Happy</span><span class="entry-origin">Thailand</span></li>
+      <li><span class="entry-title">One for the Road</span><span class="entry-origin">Thailand</span></li>
+      <li><span class="entry-title">Where Is the Friend&rsquo;s House?</span><span class="entry-origin">Iran</span></li>
+      <li><span class="entry-title">Close-Up</span><span class="entry-origin">Iran</span></li>
+      <li><span class="entry-title">The Apple</span><span class="entry-origin">Iran</span></li>
+      <li><span class="entry-title">The Lunchbox</span><span class="entry-origin">India</span></li>
+      <li><span class="entry-title">Piku</span><span class="entry-origin">India</span></li>
+      <li><span class="entry-title">Barfi!</span><span class="entry-origin">India</span></li>
+      <li><span class="entry-title">English Vinglish</span><span class="entry-origin">India</span></li>
+      <li><span class="entry-title">The Scent of Green Papaya</span><span class="entry-origin">Vietnam</span></li>
+    </ol>
+  </section>
+
+  <section class="category" id="middle-east">
+    <div class="category-head">
+      <h2>Middle Eastern Cinema</h2>
+      <span class="count">18 films</span>
+    </div>
+    <ol class="entries">
+      <li><span class="entry-title">Children of Heaven</span><span class="entry-origin">Iran</span></li>
+      <li><span class="entry-title">The Color of Paradise</span><span class="entry-origin">Iran</span></li>
+      <li><span class="entry-title">A Separation</span><span class="entry-origin">Iran</span></li>
+      <li><span class="entry-title">About Elly</span><span class="entry-origin">Iran</span></li>
+      <li><span class="entry-title">The Wind Will Carry Us</span><span class="entry-origin">Iran</span></li>
+      <li><span class="entry-title">Where Do We Go Now?</span><span class="entry-origin">Lebanon</span></li>
+      <li><span class="entry-title">Caramel</span><span class="entry-origin">Lebanon</span></li>
+      <li><span class="entry-title">Divine Intervention</span><span class="entry-origin">Palestine</span></li>
+      <li><span class="entry-title">It Must Be Heaven</span><span class="entry-origin">Palestine</span></li>
+      <li><span class="entry-title">The Band&rsquo;s Visit</span><span class="entry-origin">Israel</span></li>
+      <li><span class="entry-title">Zero Motivation</span><span class="entry-origin">Israel</span></li>
+      <li><span class="entry-title">Footnote</span><span class="entry-origin">Israel</span></li>
+      <li><span class="entry-title">Wadjda</span><span class="entry-origin">Saudi Arabia</span></li>
+      <li><span class="entry-title">The Perfect Candidate</span><span class="entry-origin">Saudi Arabia</span></li>
+      <li><span class="entry-title">Once Upon a Time in Anatolia</span><span class="entry-origin">Turkey</span></li>
+      <li><span class="entry-title">Winter Sleep</span><span class="entry-origin">Turkey</span></li>
+      <li><span class="entry-title">Distant (Uzak)</span><span class="entry-origin">Turkey</span></li>
+      <li><span class="entry-title">Microphone</span><span class="entry-origin">Egypt</span></li>
+    </ol>
+  </section>
+
+  <section class="category" id="europe">
+    <div class="category-head">
+      <h2>European Cinema</h2>
+      <span class="count">23 films</span>
+    </div>
+    <ol class="entries">
+      <li><span class="entry-title">Am&eacute;lie</span><span class="entry-origin">France</span></li>
+      <li><span class="entry-title">The Triplets of Belleville</span><span class="entry-origin">France</span></li>
+      <li><span class="entry-title">My Life as a Zucchini</span><span class="entry-origin">France / Switzerland</span></li>
+      <li><span class="entry-title">Playtime</span><span class="entry-origin">France</span></li>
+      <li><span class="entry-title">Mon Oncle</span><span class="entry-origin">France</span></li>
+      <li><span class="entry-title">Monsieur Hulot&rsquo;s Holiday</span><span class="entry-origin">France</span></li>
+      <li><span class="entry-title">The Intouchables</span><span class="entry-origin">France</span></li>
+      <li><span class="entry-title">Goodbye Lenin!</span><span class="entry-origin">Germany</span></li>
+      <li><span class="entry-title">Toni Erdmann</span><span class="entry-origin">Germany</span></li>
+      <li><span class="entry-title">Kontroll</span><span class="entry-origin">Hungary</span></li>
+      <li><span class="entry-title">Kolya</span><span class="entry-origin">Czech Republic</span></li>
+      <li><span class="entry-title">Together</span><span class="entry-origin">Sweden</span></li>
+      <li><span class="entry-title">Force Majeure</span><span class="entry-origin">Sweden</span></li>
+      <li><span class="entry-title">A Man Called Ove</span><span class="entry-origin">Sweden</span></li>
+      <li><span class="entry-title">The Square</span><span class="entry-origin">Sweden</span></li>
+      <li><span class="entry-title">Amarcord</span><span class="entry-origin">Italy</span></li>
+      <li><span class="entry-title">8&frac12;</span><span class="entry-origin">Italy</span></li>
+      <li><span class="entry-title">The Great Beauty</span><span class="entry-origin">Italy</span></li>
+      <li><span class="entry-title">Life Is Beautiful</span><span class="entry-origin">Italy</span></li>
+      <li><span class="entry-title">Local Hero</span><span class="entry-origin">UK</span></li>
+      <li><span class="entry-title">About Time</span><span class="entry-origin">UK</span></li>
+      <li><span class="entry-title">The Full Monty</span><span class="entry-origin">UK</span></li>
+      <li><span class="entry-title">The Trip</span><span class="entry-origin">UK</span></li>
+    </ol>
+  </section>
+
+  <section class="category" id="animated">
+    <div class="category-head">
+      <h2>Animated Cinema</h2>
+      <span class="count">20 films</span>
+    </div>
+    <ol class="entries">
+      <li><span class="entry-title">Spirited Away</span><span class="entry-origin">Japan</span></li>
+      <li><span class="entry-title">My Neighbor Totoro</span><span class="entry-origin">Japan</span></li>
+      <li><span class="entry-title">Grave of the Fireflies</span><span class="entry-origin">Japan</span></li>
+      <li><span class="entry-title">Only Yesterday</span><span class="entry-origin">Japan</span></li>
+      <li><span class="entry-title">The Tale of the Princess Kaguya</span><span class="entry-origin">Japan</span></li>
+      <li><span class="entry-title">When Marnie Was There</span><span class="entry-origin">Japan</span></li>
+      <li><span class="entry-title">The Boy and the Heron</span><span class="entry-origin">Japan</span></li>
+      <li><span class="entry-title">Song of the Sea</span><span class="entry-origin">Ireland</span></li>
+      <li><span class="entry-title">The Secret of Kells</span><span class="entry-origin">Ireland</span></li>
+      <li><span class="entry-title">Wolfwalkers</span><span class="entry-origin">Ireland</span></li>
+      <li><span class="entry-title">Persepolis</span><span class="entry-origin">France / Iran</span></li>
+      <li><span class="entry-title">The Illusionist</span><span class="entry-origin">France</span></li>
+      <li><span class="entry-title">Ernest &amp; Celestine</span><span class="entry-origin">France / Belgium</span></li>
+      <li><span class="entry-title">A Cat in Paris</span><span class="entry-origin">France</span></li>
+      <li><span class="entry-title">Loving Vincent</span><span class="entry-origin">Poland / UK</span></li>
+      <li><span class="entry-title">I Lost My Body</span><span class="entry-origin">France</span></li>
+      <li><span class="entry-title">Marona&rsquo;s Fantastic Tale</span><span class="entry-origin">France / Romania</span></li>
+      <li><span class="entry-title">The Red Turtle</span><span class="entry-origin">France / Japan / Belgium</span></li>
+      <li><span class="entry-title">Chico &amp; Rita</span><span class="entry-origin">Spain</span></li>
+      <li><span class="entry-title">Kirikou and the Sorceress</span><span class="entry-origin">France</span></li>
+    </ol>
+  </section>
+
+</main>
+
+<footer>
+  141 titles, one list.
+</footer>
+
+</body>
+</html>

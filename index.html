@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platforms</title>
+<style>
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #0b0b0f;
+    color: #e8e8ef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  main {
+    max-width: 560px;
+    width: 100%;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  a {
+    display: block;
+    padding: 1rem 1.25rem;
+    background: #16161d;
+    border: 1px solid #2a2a35;
+    border-radius: 10px;
+    color: #e8e8ef;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  a:hover {
+    border-color: #4a4a5a;
+    background: #1c1c25;
+  }
+  .label {
+    font-weight: 500;
+  }
+  .sub {
+    display: block;
+    font-size: 0.85rem;
+    color: #8a8a98;
+    margin-top: 0.15rem;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Platforms</h1>
+  <ul>
+    <li><a href="orbit/"><span class="label">Orbit</span></a></li>
+    <li><a href="iris/"><span class="label">Iris</span><span class="sub">Vision Instrument</span></a></li>
+    <li><a href="cinema-directory/"><span class="label">The Reel Index</span><span class="sub">Watchlist &amp; Cinema Directory</span></a></li>
+    <li><a href="watchlist/"><span class="label">A Watchlist</span></a></li>
+  </ul>
+</main>
+</body>
+</html>
