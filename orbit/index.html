@@ -290,9 +290,7 @@
   var loadingTimer = null;
   var sessionShown = {};
 
-  var sampleApiPromise = (window.claude && window.claude.use)
-    ? window.claude.use('sample').catch(function(){ return null; })
-    : Promise.resolve(null);
+  var API_BASE = 'https://platforms.vercel.app';
 
   function esc(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
@@ -405,13 +403,18 @@
   }
 
   function generateForCategory(categoryKey){
-    return sampleApiPromise.then(function(api){
-      if (!api) { var e = {code:'not_available'}; throw e; }
-      var exclude = (sessionShown[categoryKey] || []).slice();
-      DATA.filter(function(i){ return i.category === categoryKey; }).forEach(function(i){
-        if (exclude.indexOf(i.title) === -1) exclude.push(i.title);
-      });
-      return api.json(buildPrompt(categoryKey, exclude), {modelTier:'default'});
+    var exclude = (sessionShown[categoryKey] || []).slice();
+    DATA.filter(function(i){ return i.category === categoryKey; }).forEach(function(i){
+      if (exclude.indexOf(i.title) === -1) exclude.push(i.title);
+    });
+    var prompt = buildPrompt(categoryKey, exclude);
+    return fetch(API_BASE + '/api/generate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({prompt: prompt})
+    }).then(function(resp){
+      if (!resp.ok) { var e = {code: resp.status === 429 ? 'rate_limited' : 'service_error'}; throw e; }
+      return resp.json();
     }).then(function(value){
       if (!value || !value.title) { var e2 = {code:'bad_shape'}; throw e2; }
       var item = {
@@ -427,6 +430,9 @@
       if (!sessionShown[categoryKey]) sessionShown[categoryKey] = [];
       sessionShown[categoryKey].push(item.title);
       return item;
+    }).catch(function(err){
+      if (err && err.code) throw err;
+      throw {code: 'network_error'};
     });
   }
 
@@ -525,10 +531,9 @@
     clearLoadingTimer();
     var catObj = CATEGORIES.filter(function(c){ return c.key === categoryKey; })[0];
     var msg;
-    if (err && err.code === 'not_available') msg = 'Generation isn\u2019t available in this view.';
-    else if (err && err.code === 'not_granted') msg = 'Generation wasn\u2019t allowed here.';
-    else if (err && err.code === 'rate_limited') msg = 'Too many requests right now \u2014 give it a moment.';
-    else msg = 'Couldn\u2019t reach the generator just now.';
+    if (err && err.code === 'rate_limited') msg = 'Too many requests right now \u2014 give it a moment.';
+    else if (err && err.code === 'network_error') msg = 'Couldn\u2019t reach the generator \u2014 check your connection.';
+    else msg = 'Something went wrong generating this pick. Try again in a moment.';
     var content = document.getElementById('panelContent');
     content.innerHTML =
       '<div class="panel-tag" style="--pcolor:' + catObj.color + '">' + esc(catObj.label) + '</div>' +

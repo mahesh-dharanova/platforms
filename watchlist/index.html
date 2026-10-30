@@ -233,6 +233,70 @@
     main { padding: 8px 20px 80px; }
     .entry-origin { white-space: normal; text-align: right; }
   }
+
+  .toolbar-row {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 14px 28px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  @media (max-width: 480px) { .toolbar-row { padding: 14px 20px 0; } }
+
+  .search {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
+  }
+  .search svg { flex: none; opacity: 0.6; }
+  .search input {
+    all: unset;
+    flex: 1;
+    font-family: var(--font-serif);
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+  .search input::placeholder { color: var(--ink-faint); }
+
+  .theme-toggle {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .theme-toggle svg { width: 15px; height: 15px; }
+  .theme-toggle .sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .sun { display: block; }
+
+  .no-results {
+    display: none;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    font-style: italic;
+    padding: 2rem 0;
+  }
+  .no-results.show { display: block; }
+
+  ol.entries li.hide { display: none; }
+  ol.entries li:not(.hide) { animation: rowFade 180ms ease; }
+  @keyframes rowFade { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { ol.entries li:not(.hide) { animation: none; } }
+
+  section.category.hide { display: none; }
 </style>
 </head>
 <body>
@@ -243,6 +307,16 @@
 </header>
 
 <nav class="index">
+  <div class="toolbar-row">
+    <label class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="filter" type="text" placeholder="Filter by title or origin… (press / to focus)" autocomplete="off">
+    </label>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light/dark theme">
+      <svg class="moon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.3A9 9 0 1 1 11.7 3a7 7 0 0 0 9.3 9.3z"/></svg>
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </div>
   <div class="rail">
     <a href="#japan">Japan</a>
     <a href="#korea">Korea</a>
@@ -263,29 +337,29 @@
       <span class="count">23 films</span>
     </div>
     <ol class="entries">
-      <li><span class="entry-title">Perfect Days</span></li>
-      <li><span class="entry-title">Tampopo</span></li>
-      <li><span class="entry-title">Kamome Diner</span></li>
-      <li><span class="entry-title">Kikujiro</span></li>
-      <li><span class="entry-title">Survival Family</span></li>
-      <li><span class="entry-title">Megane (Glasses)</span></li>
-      <li><span class="entry-title">After the Storm</span></li>
-      <li><span class="entry-title">Sweet Bean (An)</span></li>
-      <li><span class="entry-title">Udon</span></li>
-      <li><span class="entry-title">Still Walking</span></li>
-      <li><span class="entry-title">Josee, the Tiger and the Fish</span></li>
-      <li><span class="entry-title">My Neighbors the Yamadas</span></li>
-      <li><span class="entry-title">Ocean Waves</span></li>
-      <li><span class="entry-title">The Taste of Tea</span></li>
-      <li><span class="entry-title">Fine, Totally Fine</span></li>
-      <li><span class="entry-title">Adrift in Tokyo</span></li>
-      <li><span class="entry-title">Instant Swamp</span></li>
-      <li><span class="entry-title">Turtles Are Surprisingly Fast Swimmers</span></li>
-      <li><span class="entry-title">The Mohican Comes Home</span></li>
-      <li><span class="entry-title">Our Little Sister</span></li>
-      <li><span class="entry-title">Rent-a-Cat</span></li>
-      <li><span class="entry-title">Thermae Romae</span></li>
-      <li><span class="entry-title">Wood Job!</span></li>
+      <li data-search="perfect days"><span class="entry-title">Perfect Days</span></li>
+      <li data-search="tampopo"><span class="entry-title">Tampopo</span></li>
+      <li data-search="kamome diner"><span class="entry-title">Kamome Diner</span></li>
+      <li data-search="kikujiro"><span class="entry-title">Kikujiro</span></li>
+      <li data-search="survival family"><span class="entry-title">Survival Family</span></li>
+      <li data-search="megane (glasses)"><span class="entry-title">Megane (Glasses)</span></li>
+      <li data-search="after the storm"><span class="entry-title">After the Storm</span></li>
+      <li data-search="sweet bean (an)"><span class="entry-title">Sweet Bean (An)</span></li>
+      <li data-search="udon"><span class="entry-title">Udon</span></li>
+      <li data-search="still walking"><span class="entry-title">Still Walking</span></li>
+      <li data-search="josee, the tiger and the fish"><span class="entry-title">Josee, the Tiger and the Fish</span></li>
+      <li data-search="my neighbors the yamadas"><span class="entry-title">My Neighbors the Yamadas</span></li>
+      <li data-search="ocean waves"><span class="entry-title">Ocean Waves</span></li>
+      <li data-search="the taste of tea"><span class="entry-title">The Taste of Tea</span></li>
+      <li data-search="fine, totally fine"><span class="entry-title">Fine, Totally Fine</span></li>
+      <li data-search="adrift in tokyo"><span class="entry-title">Adrift in Tokyo</span></li>
+      <li data-search="instant swamp"><span class="entry-title">Instant Swamp</span></li>
+      <li data-search="turtles are surprisingly fast swimmers"><span class="entry-title">Turtles Are Surprisingly Fast Swimmers</span></li>
+      <li data-search="the mohican comes home"><span class="entry-title">The Mohican Comes Home</span></li>
+      <li data-search="our little sister"><span class="entry-title">Our Little Sister</span></li>
+      <li data-search="rent-a-cat"><span class="entry-title">Rent-a-Cat</span></li>
+      <li data-search="thermae romae"><span class="entry-title">Thermae Romae</span></li>
+      <li data-search="wood job!"><span class="entry-title">Wood Job!</span></li>
     </ol>
   </section>
 
@@ -295,23 +369,23 @@
       <span class="count">17 films</span>
     </div>
     <ol class="entries">
-      <li><span class="entry-title">Little Forest</span></li>
-      <li><span class="entry-title">Right Now, Wrong Then</span></li>
-      <li><span class="entry-title">Microhabitat</span></li>
-      <li><span class="entry-title">Save the Green Planet!</span></li>
-      <li><span class="entry-title">Castaway on the Moon</span></li>
-      <li><span class="entry-title">Daytime Drinking</span></li>
-      <li><span class="entry-title">Worst Woman</span></li>
-      <li><span class="entry-title">Hill of Freedom</span></li>
-      <li><span class="entry-title">Miss Granny</span></li>
-      <li><span class="entry-title">Lucky Chan-sil</span></li>
-      <li><span class="entry-title">Moving On</span></li>
-      <li><span class="entry-title">In Front of Your Face</span></li>
-      <li><span class="entry-title">The Novelist&rsquo;s Film</span></li>
-      <li><span class="entry-title">Our Sunhi</span></li>
-      <li><span class="entry-title">My Sassy Girl</span></li>
-      <li><span class="entry-title">200 Pounds Beauty</span></li>
-      <li><span class="entry-title">Punch (Wandeuki)</span></li>
+      <li data-search="little forest"><span class="entry-title">Little Forest</span></li>
+      <li data-search="right now, wrong then"><span class="entry-title">Right Now, Wrong Then</span></li>
+      <li data-search="microhabitat"><span class="entry-title">Microhabitat</span></li>
+      <li data-search="save the green planet!"><span class="entry-title">Save the Green Planet!</span></li>
+      <li data-search="castaway on the moon"><span class="entry-title">Castaway on the Moon</span></li>
+      <li data-search="daytime drinking"><span class="entry-title">Daytime Drinking</span></li>
+      <li data-search="worst woman"><span class="entry-title">Worst Woman</span></li>
+      <li data-search="hill of freedom"><span class="entry-title">Hill of Freedom</span></li>
+      <li data-search="miss granny"><span class="entry-title">Miss Granny</span></li>
+      <li data-search="lucky chan-sil"><span class="entry-title">Lucky Chan-sil</span></li>
+      <li data-search="moving on"><span class="entry-title">Moving On</span></li>
+      <li data-search="in front of your face"><span class="entry-title">In Front of Your Face</span></li>
+      <li data-search="the novelist s film"><span class="entry-title">The Novelist&rsquo;s Film</span></li>
+      <li data-search="our sunhi"><span class="entry-title">Our Sunhi</span></li>
+      <li data-search="my sassy girl"><span class="entry-title">My Sassy Girl</span></li>
+      <li data-search="200 pounds beauty"><span class="entry-title">200 Pounds Beauty</span></li>
+      <li data-search="punch (wandeuki)"><span class="entry-title">Punch (Wandeuki)</span></li>
     </ol>
   </section>
 
@@ -321,12 +395,12 @@
       <span class="count">6 titles</span>
     </div>
     <ol class="entries">
-      <li><span class="entry-title">Mind Game</span></li>
-      <li><span class="entry-title">The Night Is Short, Walk On Girl</span></li>
-      <li><span class="entry-title">Wolf Children</span></li>
-      <li><span class="entry-title">Flavors of Youth</span></li>
-      <li><span class="entry-title">Mushi-Shi: The Next Chapter</span></li>
-      <li><span class="entry-title">Cat Soup</span><span class="entry-origin">short / OVA</span></li>
+      <li data-search="mind game"><span class="entry-title">Mind Game</span></li>
+      <li data-search="the night is short, walk on girl"><span class="entry-title">The Night Is Short, Walk On Girl</span></li>
+      <li data-search="wolf children"><span class="entry-title">Wolf Children</span></li>
+      <li data-search="flavors of youth"><span class="entry-title">Flavors of Youth</span></li>
+      <li data-search="mushi-shi: the next chapter"><span class="entry-title">Mushi-Shi: The Next Chapter</span></li>
+      <li data-search="cat soup short / ova"><span class="entry-title">Cat Soup</span><span class="entry-origin">short / OVA</span></li>
     </ol>
   </section>
 
@@ -336,20 +410,20 @@
       <span class="count">14 titles</span>
     </div>
     <ol class="entries">
-      <li><span class="entry-title">Nichijou</span></li>
-      <li><span class="entry-title">The Tatami Galaxy</span></li>
-      <li><span class="entry-title">Welcome to the NHK</span></li>
-      <li><span class="entry-title">Uchouten Kazoku (The Eccentric Family)</span></li>
-      <li><span class="entry-title">Girls&rsquo; Last Tour</span></li>
-      <li><span class="entry-title">Mushishi</span></li>
-      <li><span class="entry-title">Barakamon</span></li>
-      <li><span class="entry-title">Sakamoto Desu Ga?</span></li>
-      <li><span class="entry-title">Non Non Biyori</span></li>
-      <li><span class="entry-title">Tanaka-kun is Always Listless</span></li>
-      <li><span class="entry-title">Aggretsuko</span></li>
-      <li><span class="entry-title">Space Dandy</span></li>
-      <li><span class="entry-title">Ping Pong the Animation</span></li>
-      <li><span class="entry-title">Kaiba</span></li>
+      <li data-search="nichijou"><span class="entry-title">Nichijou</span></li>
+      <li data-search="the tatami galaxy"><span class="entry-title">The Tatami Galaxy</span></li>
+      <li data-search="welcome to the nhk"><span class="entry-title">Welcome to the NHK</span></li>
+      <li data-search="uchouten kazoku (the eccentric family)"><span class="entry-title">Uchouten Kazoku (The Eccentric Family)</span></li>
+      <li data-search="girls  last tour"><span class="entry-title">Girls&rsquo; Last Tour</span></li>
+      <li data-search="mushishi"><span class="entry-title">Mushishi</span></li>
+      <li data-search="barakamon"><span class="entry-title">Barakamon</span></li>
+      <li data-search="sakamoto desu ga?"><span class="entry-title">Sakamoto Desu Ga?</span></li>
+      <li data-search="non non biyori"><span class="entry-title">Non Non Biyori</span></li>
+      <li data-search="tanaka-kun is always listless"><span class="entry-title">Tanaka-kun is Always Listless</span></li>
+      <li data-search="aggretsuko"><span class="entry-title">Aggretsuko</span></li>
+      <li data-search="space dandy"><span class="entry-title">Space Dandy</span></li>
+      <li data-search="ping pong the animation"><span class="entry-title">Ping Pong the Animation</span></li>
+      <li data-search="kaiba"><span class="entry-title">Kaiba</span></li>
     </ol>
   </section>
 
@@ -360,26 +434,26 @@
     </div>
     <p class="category-note">Beyond Japan and Korea.</p>
     <ol class="entries">
-      <li><span class="entry-title">Yi Yi</span><span class="entry-origin">Taiwan</span></li>
-      <li><span class="entry-title">Eat Drink Man Woman</span><span class="entry-origin">Taiwan</span></li>
-      <li><span class="entry-title">What Time Is It There?</span><span class="entry-origin">Taiwan</span></li>
-      <li><span class="entry-title">Au Revoir Taipei</span><span class="entry-origin">Taiwan</span></li>
-      <li><span class="entry-title">Chungking Express</span><span class="entry-origin">Hong Kong</span></li>
-      <li><span class="entry-title">Fallen Angels</span><span class="entry-origin">Hong Kong</span></li>
-      <li><span class="entry-title">Shower</span><span class="entry-origin">China</span></li>
-      <li><span class="entry-title">The Farewell</span><span class="entry-origin">China / USA</span></li>
-      <li><span class="entry-title">Uncle Boonmee Who Can Recall His Past Lives</span><span class="entry-origin">Thailand</span></li>
-      <li><span class="entry-title">Cemetery of Splendour</span><span class="entry-origin">Thailand</span></li>
-      <li><span class="entry-title">Mary Is Happy, Mary Is Happy</span><span class="entry-origin">Thailand</span></li>
-      <li><span class="entry-title">One for the Road</span><span class="entry-origin">Thailand</span></li>
-      <li><span class="entry-title">Where Is the Friend&rsquo;s House?</span><span class="entry-origin">Iran</span></li>
-      <li><span class="entry-title">Close-Up</span><span class="entry-origin">Iran</span></li>
-      <li><span class="entry-title">The Apple</span><span class="entry-origin">Iran</span></li>
-      <li><span class="entry-title">The Lunchbox</span><span class="entry-origin">India</span></li>
-      <li><span class="entry-title">Piku</span><span class="entry-origin">India</span></li>
-      <li><span class="entry-title">Barfi!</span><span class="entry-origin">India</span></li>
-      <li><span class="entry-title">English Vinglish</span><span class="entry-origin">India</span></li>
-      <li><span class="entry-title">The Scent of Green Papaya</span><span class="entry-origin">Vietnam</span></li>
+      <li data-search="yi yi taiwan"><span class="entry-title">Yi Yi</span><span class="entry-origin">Taiwan</span></li>
+      <li data-search="eat drink man woman taiwan"><span class="entry-title">Eat Drink Man Woman</span><span class="entry-origin">Taiwan</span></li>
+      <li data-search="what time is it there? taiwan"><span class="entry-title">What Time Is It There?</span><span class="entry-origin">Taiwan</span></li>
+      <li data-search="au revoir taipei taiwan"><span class="entry-title">Au Revoir Taipei</span><span class="entry-origin">Taiwan</span></li>
+      <li data-search="chungking express hong kong"><span class="entry-title">Chungking Express</span><span class="entry-origin">Hong Kong</span></li>
+      <li data-search="fallen angels hong kong"><span class="entry-title">Fallen Angels</span><span class="entry-origin">Hong Kong</span></li>
+      <li data-search="shower china"><span class="entry-title">Shower</span><span class="entry-origin">China</span></li>
+      <li data-search="the farewell china / usa"><span class="entry-title">The Farewell</span><span class="entry-origin">China / USA</span></li>
+      <li data-search="uncle boonmee who can recall his past lives thailand"><span class="entry-title">Uncle Boonmee Who Can Recall His Past Lives</span><span class="entry-origin">Thailand</span></li>
+      <li data-search="cemetery of splendour thailand"><span class="entry-title">Cemetery of Splendour</span><span class="entry-origin">Thailand</span></li>
+      <li data-search="mary is happy, mary is happy thailand"><span class="entry-title">Mary Is Happy, Mary Is Happy</span><span class="entry-origin">Thailand</span></li>
+      <li data-search="one for the road thailand"><span class="entry-title">One for the Road</span><span class="entry-origin">Thailand</span></li>
+      <li data-search="where is the friend s house? iran"><span class="entry-title">Where Is the Friend&rsquo;s House?</span><span class="entry-origin">Iran</span></li>
+      <li data-search="close-up iran"><span class="entry-title">Close-Up</span><span class="entry-origin">Iran</span></li>
+      <li data-search="the apple iran"><span class="entry-title">The Apple</span><span class="entry-origin">Iran</span></li>
+      <li data-search="the lunchbox india"><span class="entry-title">The Lunchbox</span><span class="entry-origin">India</span></li>
+      <li data-search="piku india"><span class="entry-title">Piku</span><span class="entry-origin">India</span></li>
+      <li data-search="barfi! india"><span class="entry-title">Barfi!</span><span class="entry-origin">India</span></li>
+      <li data-search="english vinglish india"><span class="entry-title">English Vinglish</span><span class="entry-origin">India</span></li>
+      <li data-search="the scent of green papaya vietnam"><span class="entry-title">The Scent of Green Papaya</span><span class="entry-origin">Vietnam</span></li>
     </ol>
   </section>
 
@@ -389,24 +463,24 @@
       <span class="count">18 films</span>
     </div>
     <ol class="entries">
-      <li><span class="entry-title">Children of Heaven</span><span class="entry-origin">Iran</span></li>
-      <li><span class="entry-title">The Color of Paradise</span><span class="entry-origin">Iran</span></li>
-      <li><span class="entry-title">A Separation</span><span class="entry-origin">Iran</span></li>
-      <li><span class="entry-title">About Elly</span><span class="entry-origin">Iran</span></li>
-      <li><span class="entry-title">The Wind Will Carry Us</span><span class="entry-origin">Iran</span></li>
-      <li><span class="entry-title">Where Do We Go Now?</span><span class="entry-origin">Lebanon</span></li>
-      <li><span class="entry-title">Caramel</span><span class="entry-origin">Lebanon</span></li>
-      <li><span class="entry-title">Divine Intervention</span><span class="entry-origin">Palestine</span></li>
-      <li><span class="entry-title">It Must Be Heaven</span><span class="entry-origin">Palestine</span></li>
-      <li><span class="entry-title">The Band&rsquo;s Visit</span><span class="entry-origin">Israel</span></li>
-      <li><span class="entry-title">Zero Motivation</span><span class="entry-origin">Israel</span></li>
-      <li><span class="entry-title">Footnote</span><span class="entry-origin">Israel</span></li>
-      <li><span class="entry-title">Wadjda</span><span class="entry-origin">Saudi Arabia</span></li>
-      <li><span class="entry-title">The Perfect Candidate</span><span class="entry-origin">Saudi Arabia</span></li>
-      <li><span class="entry-title">Once Upon a Time in Anatolia</span><span class="entry-origin">Turkey</span></li>
-      <li><span class="entry-title">Winter Sleep</span><span class="entry-origin">Turkey</span></li>
-      <li><span class="entry-title">Distant (Uzak)</span><span class="entry-origin">Turkey</span></li>
-      <li><span class="entry-title">Microphone</span><span class="entry-origin">Egypt</span></li>
+      <li data-search="children of heaven iran"><span class="entry-title">Children of Heaven</span><span class="entry-origin">Iran</span></li>
+      <li data-search="the color of paradise iran"><span class="entry-title">The Color of Paradise</span><span class="entry-origin">Iran</span></li>
+      <li data-search="a separation iran"><span class="entry-title">A Separation</span><span class="entry-origin">Iran</span></li>
+      <li data-search="about elly iran"><span class="entry-title">About Elly</span><span class="entry-origin">Iran</span></li>
+      <li data-search="the wind will carry us iran"><span class="entry-title">The Wind Will Carry Us</span><span class="entry-origin">Iran</span></li>
+      <li data-search="where do we go now? lebanon"><span class="entry-title">Where Do We Go Now?</span><span class="entry-origin">Lebanon</span></li>
+      <li data-search="caramel lebanon"><span class="entry-title">Caramel</span><span class="entry-origin">Lebanon</span></li>
+      <li data-search="divine intervention palestine"><span class="entry-title">Divine Intervention</span><span class="entry-origin">Palestine</span></li>
+      <li data-search="it must be heaven palestine"><span class="entry-title">It Must Be Heaven</span><span class="entry-origin">Palestine</span></li>
+      <li data-search="the band s visit israel"><span class="entry-title">The Band&rsquo;s Visit</span><span class="entry-origin">Israel</span></li>
+      <li data-search="zero motivation israel"><span class="entry-title">Zero Motivation</span><span class="entry-origin">Israel</span></li>
+      <li data-search="footnote israel"><span class="entry-title">Footnote</span><span class="entry-origin">Israel</span></li>
+      <li data-search="wadjda saudi arabia"><span class="entry-title">Wadjda</span><span class="entry-origin">Saudi Arabia</span></li>
+      <li data-search="the perfect candidate saudi arabia"><span class="entry-title">The Perfect Candidate</span><span class="entry-origin">Saudi Arabia</span></li>
+      <li data-search="once upon a time in anatolia turkey"><span class="entry-title">Once Upon a Time in Anatolia</span><span class="entry-origin">Turkey</span></li>
+      <li data-search="winter sleep turkey"><span class="entry-title">Winter Sleep</span><span class="entry-origin">Turkey</span></li>
+      <li data-search="distant (uzak) turkey"><span class="entry-title">Distant (Uzak)</span><span class="entry-origin">Turkey</span></li>
+      <li data-search="microphone egypt"><span class="entry-title">Microphone</span><span class="entry-origin">Egypt</span></li>
     </ol>
   </section>
 
@@ -416,29 +490,29 @@
       <span class="count">23 films</span>
     </div>
     <ol class="entries">
-      <li><span class="entry-title">Am&eacute;lie</span><span class="entry-origin">France</span></li>
-      <li><span class="entry-title">The Triplets of Belleville</span><span class="entry-origin">France</span></li>
-      <li><span class="entry-title">My Life as a Zucchini</span><span class="entry-origin">France / Switzerland</span></li>
-      <li><span class="entry-title">Playtime</span><span class="entry-origin">France</span></li>
-      <li><span class="entry-title">Mon Oncle</span><span class="entry-origin">France</span></li>
-      <li><span class="entry-title">Monsieur Hulot&rsquo;s Holiday</span><span class="entry-origin">France</span></li>
-      <li><span class="entry-title">The Intouchables</span><span class="entry-origin">France</span></li>
-      <li><span class="entry-title">Goodbye Lenin!</span><span class="entry-origin">Germany</span></li>
-      <li><span class="entry-title">Toni Erdmann</span><span class="entry-origin">Germany</span></li>
-      <li><span class="entry-title">Kontroll</span><span class="entry-origin">Hungary</span></li>
-      <li><span class="entry-title">Kolya</span><span class="entry-origin">Czech Republic</span></li>
-      <li><span class="entry-title">Together</span><span class="entry-origin">Sweden</span></li>
-      <li><span class="entry-title">Force Majeure</span><span class="entry-origin">Sweden</span></li>
-      <li><span class="entry-title">A Man Called Ove</span><span class="entry-origin">Sweden</span></li>
-      <li><span class="entry-title">The Square</span><span class="entry-origin">Sweden</span></li>
-      <li><span class="entry-title">Amarcord</span><span class="entry-origin">Italy</span></li>
-      <li><span class="entry-title">8&frac12;</span><span class="entry-origin">Italy</span></li>
-      <li><span class="entry-title">The Great Beauty</span><span class="entry-origin">Italy</span></li>
-      <li><span class="entry-title">Life Is Beautiful</span><span class="entry-origin">Italy</span></li>
-      <li><span class="entry-title">Local Hero</span><span class="entry-origin">UK</span></li>
-      <li><span class="entry-title">About Time</span><span class="entry-origin">UK</span></li>
-      <li><span class="entry-title">The Full Monty</span><span class="entry-origin">UK</span></li>
-      <li><span class="entry-title">The Trip</span><span class="entry-origin">UK</span></li>
+      <li data-search="am lie france"><span class="entry-title">Am&eacute;lie</span><span class="entry-origin">France</span></li>
+      <li data-search="the triplets of belleville france"><span class="entry-title">The Triplets of Belleville</span><span class="entry-origin">France</span></li>
+      <li data-search="my life as a zucchini france / switzerland"><span class="entry-title">My Life as a Zucchini</span><span class="entry-origin">France / Switzerland</span></li>
+      <li data-search="playtime france"><span class="entry-title">Playtime</span><span class="entry-origin">France</span></li>
+      <li data-search="mon oncle france"><span class="entry-title">Mon Oncle</span><span class="entry-origin">France</span></li>
+      <li data-search="monsieur hulot s holiday france"><span class="entry-title">Monsieur Hulot&rsquo;s Holiday</span><span class="entry-origin">France</span></li>
+      <li data-search="the intouchables france"><span class="entry-title">The Intouchables</span><span class="entry-origin">France</span></li>
+      <li data-search="goodbye lenin! germany"><span class="entry-title">Goodbye Lenin!</span><span class="entry-origin">Germany</span></li>
+      <li data-search="toni erdmann germany"><span class="entry-title">Toni Erdmann</span><span class="entry-origin">Germany</span></li>
+      <li data-search="kontroll hungary"><span class="entry-title">Kontroll</span><span class="entry-origin">Hungary</span></li>
+      <li data-search="kolya czech republic"><span class="entry-title">Kolya</span><span class="entry-origin">Czech Republic</span></li>
+      <li data-search="together sweden"><span class="entry-title">Together</span><span class="entry-origin">Sweden</span></li>
+      <li data-search="force majeure sweden"><span class="entry-title">Force Majeure</span><span class="entry-origin">Sweden</span></li>
+      <li data-search="a man called ove sweden"><span class="entry-title">A Man Called Ove</span><span class="entry-origin">Sweden</span></li>
+      <li data-search="the square sweden"><span class="entry-title">The Square</span><span class="entry-origin">Sweden</span></li>
+      <li data-search="amarcord italy"><span class="entry-title">Amarcord</span><span class="entry-origin">Italy</span></li>
+      <li data-search="8&frac12; italy"><span class="entry-title">8&frac12;</span><span class="entry-origin">Italy</span></li>
+      <li data-search="the great beauty italy"><span class="entry-title">The Great Beauty</span><span class="entry-origin">Italy</span></li>
+      <li data-search="life is beautiful italy"><span class="entry-title">Life Is Beautiful</span><span class="entry-origin">Italy</span></li>
+      <li data-search="local hero uk"><span class="entry-title">Local Hero</span><span class="entry-origin">UK</span></li>
+      <li data-search="about time uk"><span class="entry-title">About Time</span><span class="entry-origin">UK</span></li>
+      <li data-search="the full monty uk"><span class="entry-title">The Full Monty</span><span class="entry-origin">UK</span></li>
+      <li data-search="the trip uk"><span class="entry-title">The Trip</span><span class="entry-origin">UK</span></li>
     </ol>
   </section>
 
@@ -448,34 +522,81 @@
       <span class="count">20 films</span>
     </div>
     <ol class="entries">
-      <li><span class="entry-title">Spirited Away</span><span class="entry-origin">Japan</span></li>
-      <li><span class="entry-title">My Neighbor Totoro</span><span class="entry-origin">Japan</span></li>
-      <li><span class="entry-title">Grave of the Fireflies</span><span class="entry-origin">Japan</span></li>
-      <li><span class="entry-title">Only Yesterday</span><span class="entry-origin">Japan</span></li>
-      <li><span class="entry-title">The Tale of the Princess Kaguya</span><span class="entry-origin">Japan</span></li>
-      <li><span class="entry-title">When Marnie Was There</span><span class="entry-origin">Japan</span></li>
-      <li><span class="entry-title">The Boy and the Heron</span><span class="entry-origin">Japan</span></li>
-      <li><span class="entry-title">Song of the Sea</span><span class="entry-origin">Ireland</span></li>
-      <li><span class="entry-title">The Secret of Kells</span><span class="entry-origin">Ireland</span></li>
-      <li><span class="entry-title">Wolfwalkers</span><span class="entry-origin">Ireland</span></li>
-      <li><span class="entry-title">Persepolis</span><span class="entry-origin">France / Iran</span></li>
-      <li><span class="entry-title">The Illusionist</span><span class="entry-origin">France</span></li>
-      <li><span class="entry-title">Ernest &amp; Celestine</span><span class="entry-origin">France / Belgium</span></li>
-      <li><span class="entry-title">A Cat in Paris</span><span class="entry-origin">France</span></li>
-      <li><span class="entry-title">Loving Vincent</span><span class="entry-origin">Poland / UK</span></li>
-      <li><span class="entry-title">I Lost My Body</span><span class="entry-origin">France</span></li>
-      <li><span class="entry-title">Marona&rsquo;s Fantastic Tale</span><span class="entry-origin">France / Romania</span></li>
-      <li><span class="entry-title">The Red Turtle</span><span class="entry-origin">France / Japan / Belgium</span></li>
-      <li><span class="entry-title">Chico &amp; Rita</span><span class="entry-origin">Spain</span></li>
-      <li><span class="entry-title">Kirikou and the Sorceress</span><span class="entry-origin">France</span></li>
+      <li data-search="spirited away japan"><span class="entry-title">Spirited Away</span><span class="entry-origin">Japan</span></li>
+      <li data-search="my neighbor totoro japan"><span class="entry-title">My Neighbor Totoro</span><span class="entry-origin">Japan</span></li>
+      <li data-search="grave of the fireflies japan"><span class="entry-title">Grave of the Fireflies</span><span class="entry-origin">Japan</span></li>
+      <li data-search="only yesterday japan"><span class="entry-title">Only Yesterday</span><span class="entry-origin">Japan</span></li>
+      <li data-search="the tale of the princess kaguya japan"><span class="entry-title">The Tale of the Princess Kaguya</span><span class="entry-origin">Japan</span></li>
+      <li data-search="when marnie was there japan"><span class="entry-title">When Marnie Was There</span><span class="entry-origin">Japan</span></li>
+      <li data-search="the boy and the heron japan"><span class="entry-title">The Boy and the Heron</span><span class="entry-origin">Japan</span></li>
+      <li data-search="song of the sea ireland"><span class="entry-title">Song of the Sea</span><span class="entry-origin">Ireland</span></li>
+      <li data-search="the secret of kells ireland"><span class="entry-title">The Secret of Kells</span><span class="entry-origin">Ireland</span></li>
+      <li data-search="wolfwalkers ireland"><span class="entry-title">Wolfwalkers</span><span class="entry-origin">Ireland</span></li>
+      <li data-search="persepolis france / iran"><span class="entry-title">Persepolis</span><span class="entry-origin">France / Iran</span></li>
+      <li data-search="the illusionist france"><span class="entry-title">The Illusionist</span><span class="entry-origin">France</span></li>
+      <li data-search="ernest   celestine france / belgium"><span class="entry-title">Ernest &amp; Celestine</span><span class="entry-origin">France / Belgium</span></li>
+      <li data-search="a cat in paris france"><span class="entry-title">A Cat in Paris</span><span class="entry-origin">France</span></li>
+      <li data-search="loving vincent poland / uk"><span class="entry-title">Loving Vincent</span><span class="entry-origin">Poland / UK</span></li>
+      <li data-search="i lost my body france"><span class="entry-title">I Lost My Body</span><span class="entry-origin">France</span></li>
+      <li data-search="marona s fantastic tale france / romania"><span class="entry-title">Marona&rsquo;s Fantastic Tale</span><span class="entry-origin">France / Romania</span></li>
+      <li data-search="the red turtle france / japan / belgium"><span class="entry-title">The Red Turtle</span><span class="entry-origin">France / Japan / Belgium</span></li>
+      <li data-search="chico   rita spain"><span class="entry-title">Chico &amp; Rita</span><span class="entry-origin">Spain</span></li>
+      <li data-search="kirikou and the sorceress france"><span class="entry-title">Kirikou and the Sorceress</span><span class="entry-origin">France</span></li>
     </ol>
   </section>
 
 </main>
 
+<p class="no-results" id="noResults">Nothing matches that search.</p>
+
 <footer>
   141 titles, one list.
 </footer>
+
+<script>
+  const filterInput = document.getElementById("filter");
+  const noResults = document.getElementById("noResults");
+
+  filterInput.addEventListener("input", () => {
+    const q = filterInput.value.trim().toLowerCase();
+    let anyVisible = false;
+
+    document.querySelectorAll("section.category").forEach((section) => {
+      let sectionHasMatch = false;
+      section.querySelectorAll("ol.entries li").forEach((li) => {
+        const match = !q || li.dataset.search.includes(q);
+        li.classList.toggle("hide", !match);
+        if (match) sectionHasMatch = true;
+      });
+      section.classList.toggle("hide", !sectionHasMatch);
+      if (sectionHasMatch) anyVisible = true;
+    });
+
+    noResults.classList.toggle("show", !anyVisible);
+  });
+
+  const THEME_KEY = "a-watchlist-theme";
+  const themeToggle = document.getElementById("themeToggle");
+  function applyTheme(theme) {
+    if (theme === "dark" || theme === "light") document.documentElement.dataset.theme = theme;
+    else delete document.documentElement.dataset.theme;
+  }
+  applyTheme(localStorage.getItem(THEME_KEY));
+  themeToggle.addEventListener("click", () => {
+    const current = document.documentElement.dataset.theme === "dark" ? "dark"
+      : document.documentElement.dataset.theme === "light" ? "light"
+      : (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const next = current === "dark" ? "light" : "dark";
+    applyTheme(next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "/" || e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    e.preventDefault();
+    filterInput.focus();
+  });
+</script>
 
 </body>
 </html>
